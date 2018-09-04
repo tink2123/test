@@ -1,4 +1,4 @@
-# 如何使用org
+# 如何贡献文档
 
 我们非常欢迎用户向官网贡献优质的文档，PaddlePaddle的文档包括中英文两个部分。文档都是通过 cmake 驱动 sphinx 编译生成的。
 
@@ -24,12 +24,12 @@ PaddlePaddle.org工具是一个文档生成和查看器工具，用户可以使�
 
 以ubuntu系统为例，运行：
 
-``` python
+``` 
 sudo apt-get update && apt-get install -y python-dev build-essential
 ```
 
 然后：
-``` python
+``` 
 git clone https://github.com/PaddlePaddle/PaddlePaddle.org.git
 cd PaddlePaddle.org/portal
 # To install in a virtual environment.
@@ -42,7 +42,7 @@ pip install -r requirements.txt
 添加您希望加载和构建内容的目录列表(选项包括：--paddle，--book，--models，--mobile)
 
 运行：
-``` python
+``` 
 ./runserver --paddle <path_to_paddle_dir> --book <path_to_book_dir>
 ```
 
