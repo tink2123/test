@@ -1,0 +1,3 @@
+[submodule "submodels"]
+	path = submodels
+	url = git@github.com:tink2123/submodels.git
