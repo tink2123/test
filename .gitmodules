@@ -1,3 +1,6 @@
 [submodule "submodels"]
 	path = submodels
 	url = git@github.com:tink2123/submodels.git
+[submodule "book"]
+	path = book
+	url = git@github.com:tink2123/submodels.git
