@@ -55,16 +55,12 @@
    目前内容有些混乱，需要修改一下
    ![](https://user-images.githubusercontent.com/31891223/48396492-91d9b300-e755-11e8-8e47-aba1bc2b804a.png)
 
-10. [generate_proposal_labels](https://github.com/PaddlePaddle/Paddle/blob/release/1.0.0/python/paddle/fluid/layers/detection.py#L1401)
 
-    没有文字说明
-    ![](https://user-images.githubusercontent.com/31891223/48396511-acac2780-e755-11e8-8228-fe425886d9f1.png)
-
-11. [polygon_box_transform](https://github.com/PaddlePaddle/Paddle/blob/4a55fb5f5b8d177a61133afe7210561f796a7e32/python/paddle/fluid/layers/detection.py#L383)
+10. [polygon_box_transform](https://github.com/PaddlePaddle/Paddle/blob/4a55fb5f5b8d177a61133afe7210561f796a7e32/python/paddle/fluid/layers/detection.py#L383)
     
     缺少example
     
-12. [force_init_on_cpu](https://github.com/PaddlePaddle/Paddle/blob/cffad81c1a4e787d7495bf6e5e3d35f08ebae967/python/paddle/fluid/initializer.py#L32)
+11. [force_init_on_cpu](https://github.com/PaddlePaddle/Paddle/blob/cffad81c1a4e787d7495bf6e5e3d35f08ebae967/python/paddle/fluid/initializer.py#L32)
 
     文字说明需要补充，该API如何应用呢？
     ![](https://user-images.githubusercontent.com/31891223/48398529-f5ff7580-e75b-11e8-9bcb-516a166db446.png)
