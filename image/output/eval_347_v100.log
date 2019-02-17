@@ -1,0 +1,245 @@
+-----------  Configuration Arguments -----------
+class_num: 80
+data_dir: dataset/coco
+dataset: coco2017
+debug: False
+draw_thresh: 0.5
+image_name: None
+image_path: image
+input_size: 608
+label_smooth: True
+learning_rate: 0.001
+max_iter: 500200
+model_cfg_path: config/yolov3.cfg
+model_save_dir: checkpoints
+nms_posk: 100
+nms_thresh: 0.45
+nms_topk: 400
+no_mixup_iter: 40000
+parallel: True
+pretrain_base: weights/darknet53
+pretrained_model: checkpoints/model_iter347999
+random_shape: True
+snapshot_iter: 2000
+start_iter: 0
+use_gpu: True
+use_multiprocess: True
+use_profile: False
+use_pyreader: True
+valid_thresh: 0.01
+------------------------------------------------
+loading annotations into memory...
+Done (t=1.13s)
+creating index...
+index created!
+Load in 80 categories.
+Loaded 5000 images from coco2017.
+batch id: 0, time: 0.39738702774
+batch id: 1, time: 0.390058040619
+batch id: 2, time: 0.354480981827
+batch id: 3, time: 0.345016956329
+batch id: 4, time: 0.332082033157
+batch id: 5, time: 0.327710151672
+batch id: 6, time: 0.327843904495
+batch id: 7, time: 0.330407142639
+batch id: 8, time: 0.338972091675
+batch id: 9, time: 0.342850923538
+batch id: 10, time: 0.352859973907
+batch id: 11, time: 0.337363004684
+batch id: 12, time: 0.322061061859
+batch id: 13, time: 0.325472831726
+batch id: 14, time: 0.323997974396
+batch id: 15, time: 0.357314825058
+batch id: 16, time: 0.349540948868
+batch id: 17, time: 0.3501060009
+batch id: 18, time: 0.341531991959
+batch id: 19, time: 0.337479829788
+batch id: 20, time: 0.318669080734
+batch id: 21, time: 0.334017038345
+batch id: 22, time: 0.351093053818
+batch id: 23, time: 0.328333854675
+batch id: 24, time: 0.320817947388
+batch id: 25, time: 0.333156108856
+batch id: 26, time: 0.329357147217
+batch id: 27, time: 0.326223134995
+batch id: 28, time: 0.327697992325
+batch id: 29, time: 0.673454046249
+batch id: 30, time: 0.319051980972
+batch id: 31, time: 0.324502944946
+batch id: 32, time: 0.33532500267
+batch id: 33, time: 0.331966161728
+batch id: 34, time: 0.324306964874
+batch id: 35, time: 0.338218927383
+batch id: 36, time: 0.333156824112
+batch id: 37, time: 0.323648929596
+batch id: 38, time: 0.334070920944
+batch id: 39, time: 0.322671890259
+batch id: 40, time: 0.336791992188
+batch id: 41, time: 0.32514500618
+batch id: 42, time: 0.333321809769
+batch id: 43, time: 0.345623016357
+batch id: 44, time: 0.327606916428
+batch id: 45, time: 0.339048147202
+batch id: 46, time: 0.340356111526
+batch id: 47, time: 0.330425977707
+batch id: 48, time: 0.328454017639
+batch id: 49, time: 0.32962012291
+batch id: 50, time: 0.333094835281
+batch id: 51, time: 0.324455022812
+batch id: 52, time: 0.313848018646
+batch id: 53, time: 0.32092499733
+batch id: 54, time: 0.330285072327
+batch id: 55, time: 0.314096927643
+batch id: 56, time: 0.322765111923
+batch id: 57, time: 0.318546056747
+batch id: 58, time: 0.322401046753
+batch id: 59, time: 0.318603992462
+batch id: 60, time: 0.344122171402
+batch id: 61, time: 0.338744878769
+batch id: 62, time: 0.313598871231
+batch id: 63, time: 0.33690404892
+batch id: 64, time: 0.31919503212
+batch id: 65, time: 0.313630104065
+batch id: 66, time: 0.321521997452
+batch id: 67, time: 0.312762022018
+batch id: 68, time: 0.333940982819
+batch id: 69, time: 0.317574977875
+batch id: 70, time: 0.319062948227
+batch id: 71, time: 0.351684093475
+batch id: 72, time: 0.340591907501
+batch id: 73, time: 0.324923992157
+batch id: 74, time: 0.357058048248
+batch id: 75, time: 0.339529037476
+batch id: 76, time: 0.32386302948
+batch id: 77, time: 0.311913013458
+batch id: 78, time: 0.319647789001
+batch id: 79, time: 0.329682826996
+batch id: 80, time: 0.314779043198
+batch id: 81, time: 0.327886104584
+batch id: 82, time: 0.322848081589
+batch id: 83, time: 0.328339099884
+batch id: 84, time: 0.338263034821
+batch id: 85, time: 0.800407886505
+batch id: 86, time: 0.330425024033
+batch id: 87, time: 0.325690031052
+batch id: 88, time: 0.350923061371
+batch id: 89, time: 0.329118967056
+batch id: 90, time: 0.310633182526
+batch id: 91, time: 0.339854955673
+batch id: 92, time: 0.328320980072
+batch id: 93, time: 0.343664884567
+batch id: 94, time: 0.32731294632
+batch id: 95, time: 0.335131168365
+batch id: 96, time: 0.356473207474
+batch id: 97, time: 0.326210975647
+batch id: 98, time: 0.336961984634
+batch id: 99, time: 0.347312927246
+batch id: 100, time: 0.321651935577
+batch id: 101, time: 0.322309970856
+batch id: 102, time: 0.311832904816
+batch id: 103, time: 0.316823959351
+batch id: 104, time: 0.328552007675
+batch id: 105, time: 0.324918985367
+batch id: 106, time: 0.315405130386
+batch id: 107, time: 0.332645893097
+batch id: 108, time: 0.320584058762
+batch id: 109, time: 0.322021007538
+batch id: 110, time: 0.411433935165
+batch id: 111, time: 0.352179050446
+batch id: 112, time: 0.386991024017
+batch id: 113, time: 0.33190202713
+batch id: 114, time: 0.334383010864
+batch id: 115, time: 0.332979917526
+batch id: 116, time: 0.314329147339
+batch id: 117, time: 0.313956975937
+batch id: 118, time: 0.334145069122
+batch id: 119, time: 0.326991081238
+batch id: 120, time: 0.323499917984
+batch id: 121, time: 0.351832151413
+batch id: 122, time: 0.329653024673
+batch id: 123, time: 0.324328899384
+batch id: 124, time: 0.331413984299
+batch id: 125, time: 0.316677093506
+batch id: 126, time: 0.336807012558
+batch id: 127, time: 0.339272022247
+batch id: 128, time: 0.342133998871
+batch id: 129, time: 0.351300954819
+batch id: 130, time: 0.329930782318
+batch id: 131, time: 0.31370806694
+batch id: 132, time: 0.337280035019
+batch id: 133, time: 0.334583044052
+batch id: 134, time: 0.32093000412
+batch id: 135, time: 0.335350990295
+batch id: 136, time: 0.332083940506
+batch id: 137, time: 0.330574035645
+batch id: 138, time: 0.335686922073
+batch id: 139, time: 0.318413972855
+batch id: 140, time: 0.360633850098
+batch id: 141, time: 0.329784154892
+batch id: 142, time: 0.324517965317
+batch id: 143, time: 0.770345211029
+batch id: 144, time: 0.317831993103
+batch id: 145, time: 0.318832159042
+batch id: 146, time: 0.338932991028
+batch id: 147, time: 0.328342914581
+batch id: 148, time: 0.318198919296
+batch id: 149, time: 0.344601154327
+batch id: 150, time: 0.318495035172
+batch id: 151, time: 0.321132898331
+batch id: 152, time: 0.342743873596
+batch id: 153, time: 0.314201116562
+batch id: 154, time: 0.343363046646
+batch id: 155, time: 0.33181810379
+batch id: 156, time: 0.322757005692
+batch id: 157, time: 0.346283912659
+batch id: 158, time: 0.325237989426
+batch id: 159, time: 0.326521873474
+batch id: 160, time: 0.345662117004
+batch id: 161, time: 0.319005966187
+batch id: 162, time: 0.330539941788
+batch id: 163, time: 0.314428806305
+batch id: 164, time: 0.321484804153
+batch id: 165, time: 0.345412015915
+batch id: 166, time: 0.318357944489
+batch id: 167, time: 0.319019079208
+batch id: 168, time: 0.334681987762
+batch id: 169, time: 0.335395097733
+batch id: 170, time: 0.314918041229
+batch id: 171, time: 0.331290960312
+batch id: 172, time: 0.31636595726
+batch id: 173, time: 0.315928936005
+batch id: 174, time: 0.349786043167
+batch id: 175, time: 0.317665100098
+batch id: 176, time: 0.338777065277
+batch id: 177, time: 0.329761981964
+batch id: 178, time: 0.323004007339
+batch id: 179, time: 0.338828802109
+batch id: 180, time: 0.322204113007
+batch id: 181, time: 0.322671175003
+batch id: 182, time: 0.345524072647
+batch id: 183, time: 0.326783895493
+batch id: 184, time: 0.334451198578
+batch id: 185, time: 0.317109107971
+batch id: 186, time: 0.315907001495
+batch id: 187, time: 0.326642036438
+batch id: 188, time: 0.329349040985
+batch id: 189, time: 0.31929397583
+batch id: 190, time: 0.33837389946
+batch id: 191, time: 0.319369077682
+batch id: 192, time: 0.322920084
+batch id: 193, time: 0.338404893875
+batch id: 194, time: 0.324521064758
+batch id: 195, time: 0.317807912827
+batch id: 196, time: 0.355992078781
+batch id: 197, time: 0.328615903854
+batch id: 198, time: 0.326751947403
+batch id: 199, time: 0.801057100296
+batch id: 200, time: 0.324055194855
+batch id: 201, time: 0.339588165283
+batch id: 202, time: 0.334875822067
+batch id: 203, time: 0.329996109009
+batch id: 204, time: 0.352149009705
+batch id: 205, time: 0.327023983002
+batch id: 206, time: 0.329155921936
+batch id: 207, time: 0.345323085785
+batch id: 208, time: 0.34638190269
