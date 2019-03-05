@@ -1,0 +1,618 @@
+block3aconv1_weights
+block3aconv2_weights
+block4aconv1_weights
+block4aconv2_weights
+block4bconv1_weights
+block4bconv2_weights
+block5aconv1_weights
+block5aconv2_weights
+block5bconv1_weights
+block5bconv2_weights
+block5cconv1_weights
+block5cconv2_weights
+block5dconv1_weights
+block5dconv2_weights
+block5econv1_weights
+block5econv2_weights
+block5fconv1_weights
+block5fconv2_weights
+block5gconv1_weights
+block5gconv2_weights
+block5hconv1_weights
+block5hconv2_weights
+block6aconv1_weights
+block6aconv2_weights
+block6bconv1_weights
+block6bconv2_weights
+block6cconv1_weights
+block6cconv2_weights
+block6dconv1_weights
+block6dconv2_weights
+block6econv1_weights
+block6econv2_weights
+block6fconv1_weights
+block6fconv2_weights
+block6gconv1_weights
+block6gconv2_weights
+block6hconv1_weights
+block6hconv2_weights
+block7aconv1_weights
+block7aconv2_weights
+block7bconv1_weights
+block7bconv2_weights
+block7cconv1_weights
+block7cconv2_weights
+block7dconv1_weights
+block7dconv2_weights
+bnck3aconv1_mean
+bnck3aconv1_offset
+bnck3aconv1_scale
+bnck3aconv1_variance
+bnck3aconv2_mean
+bnck3aconv2_offset
+bnck3aconv2_scale
+bnck3aconv2_variance
+bnck4aconv1_mean
+bnck4aconv1_offset
+bnck4aconv1_scale
+bnck4aconv1_variance
+bnck4aconv2_mean
+bnck4aconv2_offset
+bnck4aconv2_scale
+bnck4aconv2_variance
+bnck4bconv1_mean
+bnck4bconv1_offset
+bnck4bconv1_scale
+bnck4bconv1_variance
+bnck4bconv2_mean
+bnck4bconv2_offset
+bnck4bconv2_scale
+bnck4bconv2_variance
+bnck5aconv1_mean
+bnck5aconv1_offset
+bnck5aconv1_scale
+bnck5aconv1_variance
+bnck5aconv2_mean
+bnck5aconv2_offset
+bnck5aconv2_scale
+bnck5aconv2_variance
+bnck5bconv1_mean
+bnck5bconv1_offset
+bnck5bconv1_scale
+bnck5bconv1_variance
+bnck5bconv2_mean
+bnck5bconv2_offset
+bnck5bconv2_scale
+bnck5bconv2_variance
+bnck5cconv1_mean
+bnck5cconv1_offset
+bnck5cconv1_scale
+bnck5cconv1_variance
+bnck5cconv2_mean
+bnck5cconv2_offset
+bnck5cconv2_scale
+bnck5cconv2_variance
+bnck5dconv1_mean
+bnck5dconv1_offset
+bnck5dconv1_scale
+bnck5dconv1_variance
+bnck5dconv2_mean
+bnck5dconv2_offset
+bnck5dconv2_scale
+bnck5dconv2_variance
+bnck5econv1_mean
+bnck5econv1_offset
+bnck5econv1_scale
+bnck5econv1_variance
+bnck5econv2_mean
+bnck5econv2_offset
+bnck5econv2_scale
+bnck5econv2_variance
+bnck5fconv1_mean
+bnck5fconv1_offset
+bnck5fconv1_scale
+bnck5fconv1_variance
+bnck5fconv2_mean
+bnck5fconv2_offset
+bnck5fconv2_scale
+bnck5fconv2_variance
+bnck5gconv1_mean
+bnck5gconv1_offset
+bnck5gconv1_scale
+bnck5gconv1_variance
+bnck5gconv2_mean
+bnck5gconv2_offset
+bnck5gconv2_scale
+bnck5gconv2_variance
+bnck5hconv1_mean
+bnck5hconv1_offset
+bnck5hconv1_scale
+bnck5hconv1_variance
+bnck5hconv2_mean
+bnck5hconv2_offset
+bnck5hconv2_scale
+bnck5hconv2_variance
+bnck6aconv1_mean
+bnck6aconv1_offset
+bnck6aconv1_scale
+bnck6aconv1_variance
+bnck6aconv2_mean
+bnck6aconv2_offset
+bnck6aconv2_scale
+bnck6aconv2_variance
+bnck6bconv1_mean
+bnck6bconv1_offset
+bnck6bconv1_scale
+bnck6bconv1_variance
+bnck6bconv2_mean
+bnck6bconv2_offset
+bnck6bconv2_scale
+bnck6bconv2_variance
+bnck6cconv1_mean
+bnck6cconv1_offset
+bnck6cconv1_scale
+bnck6cconv1_variance
+bnck6cconv2_mean
+bnck6cconv2_offset
+bnck6cconv2_scale
+bnck6cconv2_variance
+bnck6dconv1_mean
+bnck6dconv1_offset
+bnck6dconv1_scale
+bnck6dconv1_variance
+bnck6dconv2_mean
+bnck6dconv2_offset
+bnck6dconv2_scale
+bnck6dconv2_variance
+bnck6econv1_mean
+bnck6econv1_offset
+bnck6econv1_scale
+bnck6econv1_variance
+bnck6econv2_mean
+bnck6econv2_offset
+bnck6econv2_scale
+bnck6econv2_variance
+bnck6fconv1_mean
+bnck6fconv1_offset
+bnck6fconv1_scale
+bnck6fconv1_variance
+bnck6fconv2_mean
+bnck6fconv2_offset
+bnck6fconv2_scale
+bnck6fconv2_variance
+bnck6gconv1_mean
+bnck6gconv1_offset
+bnck6gconv1_scale
+bnck6gconv1_variance
+bnck6gconv2_mean
+bnck6gconv2_offset
+bnck6gconv2_scale
+bnck6gconv2_variance
+bnck6hconv1_mean
+bnck6hconv1_offset
+bnck6hconv1_scale
+bnck6hconv1_variance
+bnck6hconv2_mean
+bnck6hconv2_offset
+bnck6hconv2_scale
+bnck6hconv2_variance
+bnck7aconv1_mean
+bnck7aconv1_offset
+bnck7aconv1_scale
+bnck7aconv1_variance
+bnck7aconv2_mean
+bnck7aconv2_offset
+bnck7aconv2_scale
+bnck7aconv2_variance
+bnck7bconv1_mean
+bnck7bconv1_offset
+bnck7bconv1_scale
+bnck7bconv1_variance
+bnck7bconv2_mean
+bnck7bconv2_offset
+bnck7bconv2_scale
+bnck7bconv2_variance
+bnck7cconv1_mean
+bnck7cconv1_offset
+bnck7cconv1_scale
+bnck7cconv1_variance
+bnck7cconv2_mean
+bnck7cconv2_offset
+bnck7cconv2_scale
+bnck7cconv2_variance
+bnck7dconv1_mean
+bnck7dconv1_offset
+bnck7dconv1_scale
+bnck7dconv1_variance
+bnck7dconv2_mean
+bnck7dconv2_offset
+bnck7dconv2_scale
+bnck7dconv2_variance
+bn_conv1_mean
+bn_conv1_offset
+bn_conv1_scale
+bn_conv1_variance
+bnnsample3_mean
+bnnsample3_offset
+bnnsample3_scale
+bnnsample3_variance
+bnnsample4_mean
+bnnsample4_offset
+bnnsample4_scale
+bnnsample4_variance
+bnnsample5_mean
+bnnsample5_offset
+bnnsample5_scale
+bnnsample5_variance
+bnnsample6_mean
+bnnsample6_offset
+bnnsample6_scale
+bnnsample6_variance
+bno_13_conv1_mean
+bno_13_conv1_offset
+bno_13_conv1_scale
+bno_13_conv1_variance
+bno_13_conv2_mean
+bno_13_conv2_offset
+bno_13_conv2_scale
+bno_13_conv2_variance
+bno_13route_mean
+bno_13route_offset
+bno_13route_scale
+bno_13route_variance
+bno_13tip_mean
+bno_13tip_offset
+bno_13tip_scale
+bno_13tip_variance
+bno_26_conv1_mean
+bno_26_conv1_offset
+bno_26_conv1_scale
+bno_26_conv1_variance
+bno_26_conv2_mean
+bno_26_conv2_offset
+bno_26_conv2_scale
+bno_26_conv2_variance
+bno_26route_mean
+bno_26route_offset
+bno_26route_scale
+bno_26route_variance
+bno_26tip_mean
+bno_26tip_offset
+bno_26tip_scale
+bno_26tip_variance
+bno_52_conv1_mean
+bno_52_conv1_offset
+bno_52_conv1_scale
+bno_52_conv1_variance
+bno_52_conv2_mean
+bno_52_conv2_offset
+bno_52_conv2_scale
+bno_52_conv2_variance
+bno_52route_mean
+bno_52route_offset
+bno_52route_scale
+bno_52route_variance
+bno_52tip_mean
+bno_52tip_offset
+bno_52tip_scale
+bno_52tip_variance
+bnv2_mean
+bnv2_offset
+bnv2_scale
+bnv2_variance
+conv1_weights
+conv2_weights
+convname: "elementwise_add_10"
+type {
+  type: LOD_TENSOR
+  lod_tensor {
+    tensor {
+      data_type: FP32
+      dims: -1
+      dims: 256
+      dims: 76
+      dims: 76
+    }
+    lod_level: 0
+  }
+}
+persistable: false
+.b_0
+convname: "elementwise_add_10"
+type {
+  type: LOD_TENSOR
+  lod_tensor {
+    tensor {
+      data_type: FP32
+      dims: -1
+      dims: 256
+      dims: 76
+      dims: 76
+    }
+    lod_level: 0
+  }
+}
+persistable: false
+.w_0
+convname: "elementwise_add_18"
+type {
+  type: LOD_TENSOR
+  lod_tensor {
+    tensor {
+      data_type: FP32
+      dims: -1
+      dims: 512
+      dims: 38
+      dims: 38
+    }
+    lod_level: 0
+  }
+}
+persistable: false
+.b_0
+convname: "elementwise_add_18"
+type {
+  type: LOD_TENSOR
+  lod_tensor {
+    tensor {
+      data_type: FP32
+      dims: -1
+      dims: 512
+      dims: 38
+      dims: 38
+    }
+    lod_level: 0
+  }
+}
+persistable: false
+.w_0
+convname: "elementwise_add_22"
+type {
+  type: LOD_TENSOR
+  lod_tensor {
+    tensor {
+      data_type: FP32
+      dims: -1
+      dims: 1024
+      dims: 19
+      dims: 19
+    }
+    lod_level: 0
+  }
+}
+persistable: false
+.b_0
+convname: "elementwise_add_22"
+type {
+  type: LOD_TENSOR
+  lod_tensor {
+    tensor {
+      data_type: FP32
+      dims: -1
+      dims: 1024
+      dims: 19
+      dims: 19
+    }
+    lod_level: 0
+  }
+}
+persistable: false
+.w_0
+downsample3_weights
+downsample4_weights
+downsample5_weights
+downsample6_weights
+learning_rate
+@LR_DECAY_COUNTER@
+name.log
+tmp_7
+velocity_0
+velocity_1
+velocity_10
+velocity_100
+velocity_101
+velocity_102
+velocity_103
+velocity_104
+velocity_105
+velocity_106
+velocity_107
+velocity_108
+velocity_109
+velocity_11
+velocity_110
+velocity_111
+velocity_112
+velocity_113
+velocity_114
+velocity_115
+velocity_116
+velocity_117
+velocity_118
+velocity_119
+velocity_12
+velocity_120
+velocity_121
+velocity_122
+velocity_123
+velocity_124
+velocity_125
+velocity_126
+velocity_127
+velocity_128
+velocity_129
+velocity_13
+velocity_130
+velocity_131
+velocity_132
+velocity_133
+velocity_134
+velocity_135
+velocity_136
+velocity_137
+velocity_138
+velocity_139
+velocity_14
+velocity_140
+velocity_141
+velocity_142
+velocity_143
+velocity_144
+velocity_145
+velocity_146
+velocity_147
+velocity_148
+velocity_149
+velocity_15
+velocity_150
+velocity_151
+velocity_152
+velocity_153
+velocity_154
+velocity_155
+velocity_156
+velocity_157
+velocity_158
+velocity_159
+velocity_16
+velocity_160
+velocity_161
+velocity_162
+velocity_163
+velocity_164
+velocity_165
+velocity_166
+velocity_167
+velocity_168
+velocity_169
+velocity_17
+velocity_170
+velocity_171
+velocity_172
+velocity_173
+velocity_174
+velocity_175
+velocity_176
+velocity_177
+velocity_178
+velocity_179
+velocity_18
+velocity_180
+velocity_181
+velocity_182
+velocity_183
+velocity_184
+velocity_185
+velocity_186
+velocity_187
+velocity_188
+velocity_189
+velocity_19
+velocity_190
+velocity_191
+velocity_192
+velocity_193
+velocity_194
+velocity_195
+velocity_196
+velocity_197
+velocity_2
+velocity_20
+velocity_21
+velocity_22
+velocity_23
+velocity_24
+velocity_25
+velocity_26
+velocity_27
+velocity_28
+velocity_29
+velocity_3
+velocity_30
+velocity_31
+velocity_32
+velocity_33
+velocity_34
+velocity_35
+velocity_36
+velocity_37
+velocity_38
+velocity_39
+velocity_4
+velocity_40
+velocity_41
+velocity_42
+velocity_43
+velocity_44
+velocity_45
+velocity_46
+velocity_47
+velocity_48
+velocity_49
+velocity_5
+velocity_50
+velocity_51
+velocity_52
+velocity_53
+velocity_54
+velocity_55
+velocity_56
+velocity_57
+velocity_58
+velocity_59
+velocity_6
+velocity_60
+velocity_61
+velocity_62
+velocity_63
+velocity_64
+velocity_65
+velocity_66
+velocity_67
+velocity_68
+velocity_69
+velocity_7
+velocity_70
+velocity_71
+velocity_72
+velocity_73
+velocity_74
+velocity_75
+velocity_76
+velocity_77
+velocity_78
+velocity_79
+velocity_8
+velocity_80
+velocity_81
+velocity_82
+velocity_83
+velocity_84
+velocity_85
+velocity_86
+velocity_87
+velocity_88
+velocity_89
+velocity_9
+velocity_90
+velocity_91
+velocity_92
+velocity_93
+velocity_94
+velocity_95
+velocity_96
+velocity_97
+velocity_98
+velocity_99
+yolo_13_conv1_weights
+yolo_13_conv2_weights
+yolo_13route_weights
+yolo_13tip_weights
+yolo_26_conv1_weights
+yolo_26_conv2_weights
+yolo_26route_weights
+yolo_26tip_weights
+yolo_52_conv1_weights
+yolo_52_conv2_weights
+yolo_52route_weights
+yolo_52tip_weights
