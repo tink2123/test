@@ -1,0 +1,113 @@
+-----------  Configuration Arguments -----------
+class_num: 80
+data_dir: dataset/coco
+dataset: coco2017
+debug: False
+draw_thresh: 0.5
+image_name: None
+image_path: image
+input_size: 608
+label_smooth: True
+learning_rate: 0.001
+max_iter: 1
+model_cfg_path: config/yolov3.cfg
+model_save_dir: checkpoints
+nms_posk: 100
+nms_thresh: 0.45
+nms_topk: 400
+no_mixup_iter: 40000
+parallel: True
+pretrain_base: weights/darknet53
+pretrained_model: weights/mxnet
+random_shape: True
+snapshot_iter: 2000
+start_iter: 0
+use_gpu: True
+use_multiprocess: True
+use_profile: False
+use_pyreader: True
+valid_thresh: 0.01
+------------------------------------------------
+i,layer_def 0 convolutional
+i,layer_def 1 convolutional
+i,layer_def 2 convolutional
+i,layer_def 3 convolutional
+i,layer_def 4 shortcut
+i,layer_def 5 convolutional
+i,layer_def 6 convolutional
+i,layer_def 7 convolutional
+i,layer_def 8 shortcut
+i,layer_def 9 convolutional
+i,layer_def 10 convolutional
+i,layer_def 11 shortcut
+i,layer_def 12 convolutional
+i,layer_def 13 convolutional
+i,layer_def 14 convolutional
+i,layer_def 15 shortcut
+i,layer_def 16 convolutional
+i,layer_def 17 convolutional
+i,layer_def 18 shortcut
+i,layer_def 19 convolutional
+i,layer_def 20 convolutional
+i,layer_def 21 shortcut
+i,layer_def 22 convolutional
+i,layer_def 23 convolutional
+i,layer_def 24 shortcut
+i,layer_def 25 convolutional
+i,layer_def 26 convolutional
+i,layer_def 27 shortcut
+i,layer_def 28 convolutional
+i,layer_def 29 convolutional
+i,layer_def 30 shortcut
+i,layer_def 31 convolutional
+i,layer_def 32 convolutional
+i,layer_def 33 shortcut
+i,layer_def 34 convolutional
+i,layer_def 35 convolutional
+i,layer_def 36 shortcut
+i,layer_def 37 convolutional
+i,layer_def 38 convolutional
+i,layer_def 39 convolutional
+i,layer_def 40 shortcut
+i,layer_def 41 convolutional
+i,layer_def 42 convolutional
+i,layer_def 43 shortcut
+i,layer_def 44 convolutional
+i,layer_def 45 convolutional
+i,layer_def 46 shortcut
+i,layer_def 47 convolutional
+i,layer_def 48 convolutional
+i,layer_def 49 shortcut
+i,layer_def 50 convolutional
+i,layer_def 51 convolutional
+i,layer_def 52 shortcut
+i,layer_def 53 convolutional
+i,layer_def 54 convolutional
+i,layer_def 55 shortcut
+i,layer_def 56 convolutional
+i,layer_def 57 convolutional
+i,layer_def 58 shortcut
+i,layer_def 59 convolutional
+i,layer_def 60 convolutional
+i,layer_def 61 shortcut
+i,layer_def 62 convolutional
+i,layer_def 63 convolutional
+i,layer_def 64 convolutional
+i,layer_def 65 shortcut
+i,layer_def 66 convolutional
+i,layer_def 67 convolutional
+i,layer_def 68 shortcut
+i,layer_def 69 convolutional
+i,layer_def 70 convolutional
+i,layer_def 71 shortcut
+i,layer_def 72 convolutional
+i,layer_def 73 convolutional
+i,layer_def 74 shortcut
+i,layer_def 75 convolutional
+i,layer_def 76 convolutional
+i,layer_def 77 convolutional
+i,layer_def 78 convolutional
+i,layer_def 79 convolutional
+i,layer_def 80 convolutional
+i,layer_def 81 convolutional
+i,layer_def 82 yolo
