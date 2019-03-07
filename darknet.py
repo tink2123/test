@@ -24,7 +24,7 @@ def conv_bn_layer(input,
                   stride,
                   padding,
                   act='leaky',
-                  name='conv',
+                  name=None,
                   i=0):
     conv1 = fluid.layers.conv2d(
         input=input,
@@ -34,14 +34,14 @@ def conv_bn_layer(input,
         padding=padding,
         act=None,
         param_attr=ParamAttr(initializer=fluid.initializer.Normal(0., 0.02),
-                name=name + str(i)+"_weights"),
+                name="conv" + str(i)+"_weights"),
         bias_attr=False,
         name=name + '.conv2d.output.1')
     if name == "conv":
         bn_name = "bn" + str(i)
     else:
-        bn_name = "bn" + name[4:]
-    print(bn_name)
+        bn_name = "bn" + str(i)
+#    print(bn_name)
 
     out = fluid.layers.batch_norm(
         input=conv1,
@@ -122,9 +122,9 @@ def basicblock(input, ch_out, stride, name,i):
     return out
 
 def layer_warp(block_func, input, ch_out, count, stride, name,i):
-    res_out = block_func(input, ch_out, stride, name="conv", i=i)
+    res_out = block_func(input, ch_out, stride, name=name, i=i)
     for j in range(1, count):
-        res_out = block_func(res_out, ch_out, 1, name="conv" ,i=i+j*2)
+        res_out = block_func(res_out, ch_out, 1, name=name ,i=i+j*3)
     return res_out
 
 DarkNet_cfg = {
@@ -133,34 +133,30 @@ DarkNet_cfg = {
 
 # num_filters = [32, 64, 128, 256, 512, 1024]
 
-def add_DarkNet53_conv_body(body_input,layers):
+def add_DarkNet53_conv_body(body_input):
 
     stages, block_func = DarkNet_cfg[53]
     stages = stages[0:5]
     conv1 = conv_bn_layer(
-            body_input, ch_out=32, filter_size=3, stride=1, padding=1, act="leaky", name="conv",i=0)
+            body_input, ch_out=32, filter_size=3, stride=1, padding=1, act="leaky", name="conv1",i=0)
     conv2 = conv_bn_layer(
-            conv1, ch_out=64, filter_size=3, stride=2, padding=1, act="leaky", name="conv",i=1)
-    block3 = layer_warp(block_func, conv2, 32, stages[0], 1, name="conv",i=2)
+            conv1, ch_out=64, filter_size=3, stride=2, padding=1, act="leaky", name="conv2",i=1)
+    block3 = layer_warp(block_func, conv2, 32, stages[0], 1, name="block3_",i=2)
     downsample3 = conv_bn_layer(
-            block3, ch_out=128, filter_size=3, stride=2, padding=1,name="conv", i=5)
+            block3, ch_out=128, filter_size=3, stride=2, padding=1,name="downsample3", i=5)
     """
     do we use freeze_at ?
     """
-    block4 = layer_warp(block_func, downsample3, 64, stages[1], 1, name="conv",i=6)
+    block4 = layer_warp(block_func, downsample3, 64, stages[1], 1, name="block4_",i=6)
     downsample4 = conv_bn_layer(
-            block4, ch_out=256, filter_size=3, stride=2, padding=1, name="conv",i=12)
-    block5 = layer_warp(block_func, downsample4, 128, stages[2], 1, name="conv", i=13)
-    if layers == "scale3":
-        return block5
+            block4, ch_out=256, filter_size=3, stride=2, padding=1, name="downsample4",i=12)
+    block5 = layer_warp(block_func, downsample4, 128, stages[2], 1, name="block5_", i=13)
     downsample5 = conv_bn_layer(
-            block5, ch_out=512, filter_size=3, stride=2, padding=1, name="conv",i=37)
-    block6 = layer_warp(block_func, downsample5, 256, stages[3], 1, name="conv", i=38)
-    if layers == "scale2":
-        return block6
+            block5, ch_out=512, filter_size=3, stride=2, padding=1, name="downsample5",i=37)
+    block6 = layer_warp(block_func, downsample5, 256, stages[3], 1, name="block6_", i=38)
+    #print (block6)
     downsample6 = conv_bn_layer(
-            block6, ch_out=1024, filter_size=3, stride=2, padding=1, name="conv", i=62)
-    block7 = layer_warp(block_func, downsample6, 512, stages[4], 1, name="conv",i=63)
-    if layers == "scale1":
-        return block7
-
+            block6, ch_out=1024, filter_size=3, stride=2, padding=1, name="downsample6", i=62)
+    block7 = layer_warp(block_func, downsample6, 512, stages[4], 1, name="block7_",i=63)
+    #print (block7)
+    return block7,block6,block5
