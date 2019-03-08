@@ -28,15 +28,15 @@ from config.config import cfg
 from config.darknet import add_DarkNet53_conv_body
 from config.darknet import conv_bn_layer
 
-def yolo_detection_block(input, channel,name,i):
+def yolo_detection_block(input, channel,i):
     assert channel % 2 == 0, "channel {} cannot be divided by 2".format(channel)
     conv1 = input
     for j in range(2):
-        conv1 = conv_bn_layer(conv1, channel, filter_size=1, stride=1, padding=0,name=name,i=i+j*2)
-        conv1 = conv_bn_layer(conv1, channel*2, filter_size=3, stride=1, padding=1,name=name,i=i+j*2+1)
-    route = conv_bn_layer(conv1, channel, filter_size=1, stride=1, padding=0,name=name,i=i+4)
+        conv1 = conv_bn_layer(conv1, channel, filter_size=1, stride=1, padding=0,i=i+j*2)
+        conv1 = conv_bn_layer(conv1, channel*2, filter_size=3, stride=1, padding=1,i=i+j*2+1)
+    route = conv_bn_layer(conv1, channel, filter_size=1, stride=1, padding=0,i=i+4)
     # what's tip meanning
-    tip = conv_bn_layer(route,channel*2, filter_size=3, stride=1, padding=1,name=name,i=i+5)
+    tip = conv_bn_layer(route,channel*2, filter_size=3, stride=1, padding=1,i=i+5)
     return route, tip
 
 def upsample(out, stride=2,name=None):
@@ -92,7 +92,7 @@ class YOLOv3(object):
         scale1,scale2,scale3 = add_DarkNet53_conv_body(out)
          
         # 13*13 scale output
-        route1, tip1 = yolo_detection_block(scale1, channel=512,name="yolo13",i=75)
+        route1, tip1 = yolo_detection_block(scale1, channel=512,i=75)
         # scale1 output
         scale1_out = fluid.layers.conv2d(
             input=tip1,
@@ -101,9 +101,11 @@ class YOLOv3(object):
             stride=1,
             padding=0,
             act=None,
-            param_attr=ParamAttr(name="conv81_weights"),
-            bias_attr=ParamAttr(name="conv81_bias"),
-            name="conv81")
+            param_attr=ParamAttr(initializer=fluid.initializer.Normal(0., 0.02),
+                 name="conv81_weights"),
+            bias_attr=ParamAttr(initializer=fluid.initializer.Constant(0.0),
+                                 regularizer=L2Decay(0.),
+                                 name="conv81_bias"))
 
         #print (scale1_out)
         self.outputs.append(scale1_out) 
@@ -114,7 +116,6 @@ class YOLOv3(object):
             filter_size=1,
             stride=1,
             padding=0,
-            name="conv84_weights",
             i=84)
         # upsample
         route1 = upsample(route1)
@@ -124,9 +125,9 @@ class YOLOv3(object):
             input=[route1,scale2],
             axis=1)
 
-        print("route1",route1)
+        #print("route1",route1)
         # 26*26 scale output
-        route2, tip2 = yolo_detection_block(route1, channel=256, name="yolo26",i=87)
+        route2, tip2 = yolo_detection_block(route1, channel=256,i=87)
         
         # scale2 output
         scale2_out = fluid.layers.conv2d(
@@ -137,8 +138,7 @@ class YOLOv3(object):
             padding=0,
             act=None,
             param_attr=ParamAttr(name="conv93_weights"),
-            bias_attr=ParamAttr(name="conv93_bias"),
-            name="conv93")
+            bias_attr=ParamAttr(name="conv93_bias"))
 
         self.outputs.append(scale2_out)
 
@@ -149,7 +149,6 @@ class YOLOv3(object):
             filter_size=1,
             stride=1,
             padding=0,
-            name="conv96_weights",
             i=96)
         # upsample
         route2 = upsample(route2)
@@ -160,7 +159,7 @@ class YOLOv3(object):
             axis=1)
 
         # 52*52 scale output
-        route3, tip3 = yolo_detection_block(route2, channel=128, name="yolo52",i=99)
+        route3, tip3 = yolo_detection_block(route2, channel=128, i=99)
 
         # scale3 output
         scale3_out = fluid.layers.conv2d(
@@ -171,8 +170,7 @@ class YOLOv3(object):
             padding=0,
             act=None,
             param_attr=ParamAttr(name="conv105_weights"),
-            bias_attr=ParamAttr(name="conv105_bias"),
-            name="conv105")
+            bias_attr=ParamAttr(name="conv105_bias"))
 
 
         self.outputs.append(scale3_out)
@@ -259,4 +257,5 @@ class YOLOv3(object):
 
     def get_input_size(self):
         return cfg.input_size
+
 
