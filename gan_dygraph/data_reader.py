@@ -11,11 +11,11 @@ import numpy as np
 ###B_TEST_LIST_FILE = "./train_data/testB.txt"
 ###IMAGES_ROOT = "./train_data/"
 
-A_LIST_FILE = "/workspace/models_P4/PaddleCV/gan/cycle_gan/data/horse2zebra/trainA.txt"
-B_LIST_FILE = "/workspace/models_P4/PaddleCV/gan/cycle_gan/data/horse2zebra/trainB.txt"
-A_TEST_LIST_FILE = "/workspace/models_P4/PaddleCV/gan/cycle_gan/data/horse2zebra/testA.txt"
-B_TEST_LIST_FILE = "/workspace/models_P4/PaddleCV/gan/cycle_gan/data/horse2zebra/testB.txt"
-IMAGES_ROOT = "/workspace/models_P4/PaddleCV/gan/cycle_gan/data/horse2zebra/"
+A_LIST_FILE = "/workspace/models_P4/PaddleCV/gan/data/cityscapes/trainA.txt"
+B_LIST_FILE = "/workspace/models_P4/PaddleCV/gan/data/cityscapes/trainB.txt"
+A_TEST_LIST_FILE = "/workspace/models_P4/PaddleCV/gan/data/cityscapes/testA.txt"
+B_TEST_LIST_FILE = "/workspace/models_P4/PaddleCV/gan/data/cityscapes/testB.txt"
+IMAGES_ROOT = "/workspace/models_P4/PaddleCV/gan/data/cityscapes/"
 
 def image_shape():
     return [3, 256, 256]

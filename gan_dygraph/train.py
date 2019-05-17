@@ -17,7 +17,7 @@ import data_reader
 from utility import add_arguments, print_arguments, ImagePool
 from trainer import *
 from paddle.fluid.dygraph.base import to_variable
-
+import six
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
 # yapf: disable
@@ -36,7 +36,6 @@ add_arg('changes',           str,   "None",    "The change this time takes.")
 lambda_A = 10.0
 lambda_B = 10.0
 lambda_identity = 0.5
-one = 1
 
 
 def optimizer_setting():
@@ -109,13 +108,19 @@ def train(args):
         losses = [[], []]
         t_time = 0
 
+        optimizer1 = optimizer_setting()
+        optimizer2 = optimizer_setting()
+        optimizer3 = optimizer_setting()
 
         for epoch in range(args.epoch):
             batch_id = 0
             for i in range(max_images_num):
+                #if epoch == 0 and batch_id ==0:
+                #    for param in g_a.parameters():
+                #        print(param.name,param.numpy())
                 data_A = next(A_reader)
                 data_B = next(B_reader)
-                print(data_A[0])
+                #print(data_A[0])
 
                 s_time = time.time()
                 data_A = np.array([data_A[0].reshape(3,256,256)]).astype("float32")
@@ -126,15 +131,19 @@ def train(args):
                 fake_A,fake_B,cyc_A,cyc_B,diff_A,\
                 diff_B,fake_rec_A,fake_rec_B,idt_A,idt_B = g_a(data_A,data_B)
 
+                #print(fake_B.numpy()) 
                 # cycle loss
                 cyc_A_loss = fluid.layers.reduce_mean(diff_A) * lambda_A
                 cyc_B_loss = fluid.layers.reduce_mean(diff_B) * lambda_B
                 cyc_loss = cyc_A_loss + cyc_B_loss
-
+	        #for k,v in six.iteritems(fluid.framework._dygraph_tracer()._ops):
+                #    print(v.type)	
+		  
+                #print(fluid.framework._dygraph_tracer()._ops)
                 #gan loss D_A(G_A(A))
-                g_A_loss = fluid.layers.reduce_mean(fluid.layers.square(fake_rec_A-one))
+                g_A_loss = fluid.layers.reduce_mean(fluid.layers.square(fake_rec_A-1))
                 #gan loss D_B(G_B(B))
-                g_B_loss = fluid.layers.reduce_mean(fluid.layers.square(fake_rec_B-one))
+                g_B_loss = fluid.layers.reduce_mean(fluid.layers.square(fake_rec_B-1))
 
                 g_loss = g_A_loss + g_B_loss
 
@@ -155,12 +164,11 @@ def train(args):
 
                 g_loss_out = g_loss.numpy()
 
-                #g_loss.backward()
-                optimizer1 = optimizer_setting()
+                g_loss.backward()
                 optimizer1.minimize(g_loss)
                 g_a.clear_gradients()
 
-                print("epoch id: %d, batch step: %d, loss: %f" % (epoch, batch_id, g_loss_out))
+                print("epoch id: %d, batch step: %d, g_loss: %f" % (epoch, batch_id, g_loss_out))
 
     ###            g_A_loss, g_A_cyc_loss, g_A_idt_loss, g_B_loss, g_B_cyc_loss, g_B_idt_loss, fake_A_tmp, fake_B_tmp = exe.run(
     ###                gen_trainer_program,
@@ -169,54 +177,54 @@ def train(args):
     ###                feed={"input_A": tensor_A,
     ###                      "input_B": tensor_B})
 
-                fake_pool_B = B_pool.pool_image(fake_B)
-                print(fake_pool_B[0])
+                fake_pool_B = B_pool.pool_image(fake_B).numpy()
                 fake_pool_B = np.array([fake_pool_B[0].reshape(3,256,256)]).astype("float32")
                 fake_pool_B = to_variable(fake_pool_B)
-                print(fake_pool_B)
-                fake_pool_A = A_pool.pool_image(fake_A)
+
+                fake_pool_A = A_pool.pool_image(fake_A).numpy()
+                fake_pool_A = np.array([fake_pool_A[0].reshape(3,256,256)]).astype("float32")
+                fake_pool_A = to_variable(fake_pool_B)
 
                 # optimize the d_A network
-                rec_A, fake_pool_rec_A = d_a(data_B,fake_pool_B)
-                d_loss_A = (fluid.layers.square(fake_pool_rec_A) +
-                    fluid.layers.square(rec_A - 1)) / 2.0
+                rec_B, fake_pool_rec_B = d_a(data_B,fake_pool_B)
+                if batch_id == 0:
+                    print("rec_B",rec_B.numpy())
+                    print("fake_pool_rec_B",fake_pool_rec_B.numpy())
+                d_loss_A = (fluid.layers.square(fake_pool_rec_B) +
+                    fluid.layers.square(rec_B - 1)) / 2.0
                 d_loss_A = fluid.layers.reduce_mean(d_loss_A)
 
-                optimizer2 = optimizer_setting()
+                d_loss_A.backward()
                 optimizer2.minimize(d_loss_A)
                 d_a.clear_gradients()
 
                 # optimize the d_B network
 
-                rec_B, fake_pool_rec_B = d_b(data_A,fake_pool_A)
-                d_loss_B = (fluid.layers.square(self.fake_pool_rec_B) +
-                    fluid.layers.square(rec_B - 1)) / 2.0
+                rec_A, fake_pool_rec_A = d_b(data_A,fake_pool_A)
+                d_loss_B = (fluid.layers.square(fake_pool_rec_A) +
+                    fluid.layers.square(rec_A - 1)) / 2.0
                 d_loss_B = fluid.layers.reduce_mean(d_loss_B)
 
-                optimize3 = optimizer_setting()
-                optimize3.minimize(d_loss_B)
+                d_loss_B.backward()
+                optimizer3.minimize(d_loss_B)
                 d_b.clear_gradients()
 
                 batch_time = time.time() - s_time
                 t_time += batch_time
                 print(
-                    "epoch{}; batch{}; d_A_loss: {}; g_A_loss: {}; g_A_cyc_loss: {};\
-                     g_A_idt_loss: {}; d_B_loss: {}; g_B_loss: {}; g_B_cyc_loss: {}; \
-                     g_B_idt_loss: {}; Batch_time_cost: {:.2f}".format(epoch, batch_id,\
-                      d_A_loss[0], g_A_loss[0], g_A_cyc_loss[0], g_A_idt_loss[0],\
-                       d_B_loss[0], g_B_loss[0], g_B_cyc_loss[0], g_B_idt_loss[0], batch_time))
+                    "epoch{}; batch{}; d_A_loss: {}; g_A_loss: {}; g_A_cyc_loss: {}; g_A_idt_loss: {}; d_B_loss: {}; g_B_loss: {}; g_B_cyc_loss:  {}; g_B_idt_loss: {};Batch_time_cost: {:.2f}".format(epoch, batch_id,d_loss_A.numpy()[0], g_A_loss.numpy()[0],cyc_A_loss.numpy()[0], idt_loss_A.numpy()[0], d_loss_B.numpy()[0], g_B_loss.numpy()[0],cyc_B_loss.numpy()[0],idt_loss_B.numpy()[0], batch_time))
                 with open('logging_{}.txt'.format(args.changes), 'a') as log_file:
                     now = time.strftime("%c")
                     log_file.write(
-                    "time: {}     epoch{}; batch{}; d_A_loss: {}; g_A_loss: {}; \
+                    "time: {}; epoch{}; batch{}; d_A_loss: {}; g_A_loss: {}; \
                     g_A_cyc_loss: {}; g_A_idt_loss: {}; d_B_loss: {}; \
                     g_B_loss: {}; g_B_cyc_loss: {}; g_B_idt_loss: {}; \
                     Batch_time_cost: {:.2f}\n".format(now, epoch, \
-                        batch_id, d_A_loss[0], g_A_loss[ 0], g_A_cyc_loss[0], \
-                        g_A_idt_loss[0], d_B_loss[0], g_B_loss[0], \
-                        g_B_cyc_loss[0], g_B_idt_loss[0], batch_time))
+                        batch_id, d_loss_A[0], g_A_loss[ 0], cyc_A_loss[0], \
+                        idt_loss_A[0], d_loss_B[0], g_A_loss[0], \
+                        cyc_B_loss[0], idt_loss_B[0], batch_time))
                 losses[0].append(g_A_loss[0])
-                losses[1].append(d_A_loss[0])
+                losses[1].append(d_loss_A[0])
                 sys.stdout.flush()
                 batch_id += 1
 
