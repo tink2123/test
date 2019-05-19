@@ -82,7 +82,7 @@ def conv2d(input,
             initializer=fluid.initializer.Constant(0.0))
 ###            initializer = fluid.initializer.NormalInitializer(loc=0.0, scale=stddev))
     else:
-       bias_attr = None
+       bias_attr = False
 
     conv = fluid.layers.conv2d(
         input,

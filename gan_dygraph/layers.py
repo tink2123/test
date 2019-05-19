@@ -48,7 +48,7 @@ class conv2d(fluid.dygraph.Layer):
             num_channels=num_filters,
             param_attr=fluid.ParamAttr(
                 name="scale",
-                initializer=fluid.initializer.Constant(1.)),
+                initializer=fluid.initializer.NormalInitializer(1.0,0.02)),
             bias_attr=fluid.ParamAttr(
                 name="bias",
                 initializer=fluid.initializer.Constant(0.0)),
@@ -67,7 +67,7 @@ class conv2d(fluid.dygraph.Layer):
         if self.norm:
             conv = self.bn(conv)
         if self.relu:
-            conv = fluid.layers.leaky_relu(conv,alpha=self.relufactor)
+            conv = fluid.layers.leaky_relu(conv,alpha=0.2)
        
         return conv
 
@@ -131,4 +131,5 @@ class DeConv2D(fluid.dygraph.Layer):
         if self.relu:
             conv = fluid.layers.leaky_relu(conv,alpha=self.relufactor)
         return conv
+
 

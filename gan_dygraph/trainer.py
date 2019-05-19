@@ -24,10 +24,10 @@ class Cycle_Gan(fluid.dygraph.Layer):
         self.is_DA = is_DA
         self.is_DB = is_DB
 
-    def build_once(self,input_A,input_B):
-        print('---------------', input_A.shape)
-        print('---------------', input_B.shape)
-      
+    ###def build_once(self,input_A,input_B):
+    ###    print('---------------', input_A.shape)
+    ###    print('---------------', input_B.shape)
+    ###  
 
     def forward(self,input_A,input_B):
 

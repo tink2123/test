@@ -161,3 +161,4 @@ class build_gen_discriminator(fluid.dygraph.Layer):
         y = self.conv4(y)
         return y
 
+

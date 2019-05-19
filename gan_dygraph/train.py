@@ -36,21 +36,8 @@ add_arg('changes',           str,   "None",    "The change this time takes.")
 lambda_A = 10.0
 lambda_B = 10.0
 lambda_identity = 0.5
+tep_per_epoch = 2974
 
-
-def optimizer_setting():
-    lr=0.0002
-    optimizer = fluid.optimizer.Adam(
-        learning_rate=fluid.layers.piecewise_decay(
-            boundaries=[
-                12 * step_per_epoch, 32 * step_per_epoch,
-                52 * step_per_epoch, 72 * step_per_epoch
-            ],
-            values=[
-                lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
-            ]),
-        beta1=0.5)
-    return optimizer
 
 def train(args):
     dy_param_init_value = {}
@@ -122,9 +109,6 @@ def train(args):
         losses = [[], []]
         t_time = 0
 
-        optimizer1 = optimizer_setting()
-        optimizer2 = optimizer_setting()
-        optimizer3 = optimizer_setting()
         vars1 = []
 ##        for param in G.parameters():
 ##            if param.name[:44]=="g/Cycle_Gan_0/build_generator_resnet_9blocks":
@@ -150,6 +134,8 @@ def train(args):
                 # optimize the g_A network
                 fake_A,fake_B,cyc_A,cyc_B,diff_A,diff_B,fake_rec_A,fake_rec_B,idt_A,idt_B = G(data_A,data_B)
 
+                fake_A.persistable=True
+                fake_B.persistable=True
                 #print(fake_B.numpy()) 
                 # cycle loss
                 cyc_A_loss = fluid.layers.reduce_mean(diff_A) * lambda_A
@@ -179,7 +165,7 @@ def train(args):
                     x = data_A, y = idt_B))) * lambda_A * lambda_identity
 
                 idt_loss = fluid.layers.elementwise_add(idt_loss_A, idt_loss_B)
-
+                print("g_loss:",g_loss)
                 g_loss = cyc_loss + g_loss + idt_loss
 
                 g_loss_out = g_loss.numpy()
@@ -191,7 +177,19 @@ def train(args):
                     if param.name[:44]=="g/Cycle_Gan_0/build_generator_resnet_9blocks": 
                         #print (param.name)
                         vars_G.append(param)
-                optimizer1.minimize(g_loss,parameter_list=vars_G)                
+                lr = 0.0002
+                optimizer = fluid.optimizer.Adam(
+                    learning_rate=fluid.layers.piecewise_decay(
+                        boundaries=[
+                            12 * step_per_epoch, 32 * step_per_epoch,
+                            52 * step_per_epoch, 72 * step_per_epoch
+                        ],
+                        values=[
+                            lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
+                        ]),
+                    beta1=0.5)
+
+                optimizer.minimize(g_loss,parameter_list=vars_G)                
                 #fluid.dygraph.save_persistables(G.state_dict(),"./G")
                 G.clear_gradients()
 
@@ -229,7 +227,7 @@ def train(args):
                     if param.name[:41]=="d_a/Cycle_Gan_0/build_gen_discriminator_0":
                         #print (param.name)
                         vars_da.append(param)
-                optimizer2.minimize(d_loss_A,parameter_list=vars_da)
+                optimizer.minimize(d_loss_A,parameter_list=vars_da)
                 #fluid.dygraph.save_persistables(D_A.state_dict(),
                 #                                    "./G")
                 D_A.clear_gradients()
@@ -253,7 +251,7 @@ def train(args):
                     if param.name[:41]=="d_b/Cycle_Gan_0/build_gen_discriminator_1":
                         #print (param.name)
                         vars_db.append(param)
-                optimizer2.minimize(d_loss_B,parameter_list=vars_db)
+                optimizer.minimize(d_loss_B,parameter_list=vars_db)
                 #fluid.dygraph.save_persistables(D_B.state_dict(),
                 #                                    "./G")
                 D_B.clear_gradients()
