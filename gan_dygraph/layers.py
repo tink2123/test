@@ -26,17 +26,10 @@ class conv2d(fluid.dygraph.Layer):
                 use_bias=False):
         super(conv2d, self).__init__(name_scope)
 
-        self.conv_bias = Conv2D(
-            self.full_name(),
-            num_channels=num_channels,
-            num_filters=num_filters,
-            filter_size=filter_size,
-            stride=stride,
-            padding=padding,
-            use_cudnn=use_cudnn,
-            param_attr=fluid.ParamAttr(
-                initializer=fluid.initializer.NormalInitializer(0.0,0.02)),
-            bias_attr=None)
+        if use_bias == False:
+            bias_attr = False
+        else:
+            bias_attr = fluid.ParamAttr(name="conv_bias",initializer=fluid.initializer.Constant(0.0))
 
         self.conv = Conv2D(
             self.full_name(),
@@ -47,17 +40,17 @@ class conv2d(fluid.dygraph.Layer):
             padding=padding,
             use_cudnn=use_cudnn,
             param_attr=fluid.ParamAttr(
+                name="conv2d_weights",
                 initializer=fluid.initializer.NormalInitializer(0.0,0.02)),
-            bias_attr=fluid.ParamAttr(
-                initializer=fluid.initializer.Constant(0.0)))
+            bias_attr=None)
 
         self.bn = BatchNorm(self.full_name(),
             num_channels=num_filters,
             param_attr=fluid.ParamAttr(
-                name="what's_weight",
+                name="scale",
                 initializer=fluid.initializer.Constant(1.)),
             bias_attr=fluid.ParamAttr(
-                name="what's",
+                name="bias",
                 initializer=fluid.initializer.Constant(0.0)),
             )
 
@@ -68,12 +61,11 @@ class conv2d(fluid.dygraph.Layer):
 
     
     def forward(self,inputs):
-        if self.use_bias == False:
-            conv = self.conv(inputs)
-        else:
-            conv = self.conv_bias(inputs)
-##        if self.norm:
-##            conv = self.bn(conv)
+        conv = self.conv(inputs)
+        #print("norm",self.norm)
+        #print("bias",self.biat_attr)
+        if self.norm:
+            conv = self.bn(conv)
         if self.relu:
             conv = fluid.layers.leaky_relu(conv,alpha=self.relufactor)
        
@@ -96,25 +88,30 @@ class DeConv2D(fluid.dygraph.Layer):
             ):
         super(DeConv2D,self).__init__(name_scope)
 
+        if use_bias == False:
+            bias_attr = False
+        else:
+            bias_attr = fluid.ParamAttr(name="de_bias",initializer=fluid.initializer.Constant(0.0))
+
         self._deconv = Conv2DTranspose(self.full_name(),
                                         num_filters,
                                         filter_size=filter_size,
                                         stride=stride,
                                         padding=padding,
                                         param_attr=fluid.ParamAttr(
+                                            name="this_is_deconv_weights",
                                             initializer=fluid.initializer.TruncatedNormal(scale=stddev)),
-                                        bias_attr=fluid.ParamAttr(
-                			    initializer=fluid.initializer.Constant(0.0)))
+                                        bias_attr=bias_attr)
+
+
+
 
         self.bn = BatchNorm(self.full_name(),
             num_channels=num_filters,
             param_attr=fluid.ParamAttr(
                 name="de_wights",
                 initializer=fluid.initializer.TruncatedNormal(1.0, 0.02)),
-            bias_attr=fluid.ParamAttr(
-                name="de_bias",
-                initializer=fluid.initializer.Constant(0.0)),
-            )        
+            bias_attr=fluid.ParamAttr(name="de_bn_bias",initializer=fluid.initializer.Constant(0.0)))        
         self.outpadding = outpadding
         self.relufactor = relufactor
         self.use_bias = use_bias
@@ -123,10 +120,10 @@ class DeConv2D(fluid.dygraph.Layer):
 
     def forward(self,inputs):
         #todo: add use_bias
-        if self.use_bias==False:
-            conv = self._deconv(inputs)
-        else:
-            conv = self._deconv(inputs)
+        #if self.use_bias==False:
+        conv = self._deconv(inputs)
+        #else:
+        #    conv = self._deconv(inputs)
         conv = fluid.layers.pad2d(conv, paddings=self.outpadding, mode='Constant', pad_value=0.0)
 
         if self.norm:

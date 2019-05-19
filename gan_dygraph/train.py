@@ -53,7 +53,7 @@ def optimizer_setting():
     return optimizer
 
 def train(args):
-
+    dy_param_init_value = {}
     with fluid.dygraph.guard():
 
         max_images_num = data_reader.max_images_num()
@@ -101,9 +101,23 @@ def train(args):
             print("saved checkpoint to {}".format(out_path))
             sys.stdout.flush()
 
-        g_a = G_A("g_a")
-        d_a = D_A("d_a")
-        d_b = D_B("d_b")
+        G = Cycle_Gan("g",istrain=True,is_G=True,is_DA=False,is_DB=False)
+        D_A = Cycle_Gan("d_a",istrain=True,is_G=False,is_DA=True,is_DB=False)
+        D_B = Cycle_Gan("d_b",istrain=True,is_G=False,is_DA=False,is_DB=True)
+
+        def load_dict(self, stat_dict, include_sublayers=True):
+            self._loaddict_holder = stat_dict
+            for name, item in self.__dict__.get('_parameters', None).items():
+                if item.name in stat_dict:
+                    var = item._ivar.value()
+                    tensor = var.get_tensor()
+                    tensor.set(stat_dict[item.name].numpy(),
+                               framework._current_expected_place())
+
+            if include_sublayers:
+                for layer_name, layer_item in self._sub_layers.items():
+                    if layer_item is not None:
+                        layer_item.load_dict(stat_dict)
 
         losses = [[], []]
         t_time = 0
@@ -111,13 +125,18 @@ def train(args):
         optimizer1 = optimizer_setting()
         optimizer2 = optimizer_setting()
         optimizer3 = optimizer_setting()
-
+        vars1 = []
+##        for param in G.parameters():
+##            if param.name[:44]=="g/Cycle_Gan_0/build_generator_resnet_9blocks":
+##                print (param.name)
+##                vars1.append(var.name)
+##
         for epoch in range(args.epoch):
             batch_id = 0
             for i in range(max_images_num):
-                #if epoch == 0 and batch_id ==0:
-                #    for param in g_a.parameters():
-                #        print(param.name,param.numpy())
+                #if epoch == 0 and batch_id ==1:
+                #    for param in G.parameters():
+                #        print(param.name,param.shape)
                 data_A = next(A_reader)
                 data_B = next(B_reader)
                 #print(data_A[0])
@@ -127,18 +146,19 @@ def train(args):
                 data_B = np.array([data_B[0].reshape(3,256,256)]).astype("float32")
                 data_A = to_variable(data_A)
                 data_B = to_variable(data_B)
+
                 # optimize the g_A network
-                fake_A,fake_B,cyc_A,cyc_B,diff_A,\
-                diff_B,fake_rec_A,fake_rec_B,idt_A,idt_B = g_a(data_A,data_B)
+                fake_A,fake_B,cyc_A,cyc_B,diff_A,diff_B,fake_rec_A,fake_rec_B,idt_A,idt_B = G(data_A,data_B)
 
                 #print(fake_B.numpy()) 
                 # cycle loss
                 cyc_A_loss = fluid.layers.reduce_mean(diff_A) * lambda_A
                 cyc_B_loss = fluid.layers.reduce_mean(diff_B) * lambda_B
                 cyc_loss = cyc_A_loss + cyc_B_loss
-	        #for k,v in six.iteritems(fluid.framework._dygraph_tracer()._ops):
-                #    print(v.type)	
-		  
+                print(cyc_loss)
+                #for k,v in six.iteritems(fluid.framework._dygraph_tracer()._ops):
+                #    print(v.type)  
+          
                 #print(fluid.framework._dygraph_tracer()._ops)
                 #gan loss D_A(G_A(A))
                 g_A_loss = fluid.layers.reduce_mean(fluid.layers.square(fake_rec_A-1))
@@ -165,17 +185,26 @@ def train(args):
                 g_loss_out = g_loss.numpy()
 
                 g_loss.backward()
-                optimizer1.minimize(g_loss)
-                g_a.clear_gradients()
+                #optimizer1.minimize(g_loss)
+                vars_G = []
+                for param in G.parameters():
+                    if param.name[:44]=="g/Cycle_Gan_0/build_generator_resnet_9blocks": 
+                        #print (param.name)
+                        vars_G.append(param)
+                optimizer1.minimize(g_loss,parameter_list=vars_G)                
+                #fluid.dygraph.save_persistables(G.state_dict(),"./G")
+                G.clear_gradients()
+
+                #for param in G.parameters():
+                #    dy_param_init_value[param.name] = param.numpy()
+
+                #restore = fluid.dygraph.load_persistables("./G")
+                #G.load_dict(restore)
+
 
                 print("epoch id: %d, batch step: %d, g_loss: %f" % (epoch, batch_id, g_loss_out))
 
-    ###            g_A_loss, g_A_cyc_loss, g_A_idt_loss, g_B_loss, g_B_cyc_loss, g_B_idt_loss, fake_A_tmp, fake_B_tmp = exe.run(
-    ###                gen_trainer_program,
-    ###                fetch_list=[gen_trainer.G_A, gen_trainer.cyc_A_loss, gen_trainer.idt_loss_A, gen_trainer.G_B, gen_trainer.cyc_B_loss,
-    ###                            gen_trainer.idt_loss_B, gen_trainer.fake_A, gen_trainer.fake_B],
-    ###                feed={"input_A": tensor_A,
-    ###                      "input_B": tensor_B})
+
 
                 fake_pool_B = B_pool.pool_image(fake_B).numpy()
                 fake_pool_B = np.array([fake_pool_B[0].reshape(3,256,256)]).astype("float32")
@@ -186,7 +215,7 @@ def train(args):
                 fake_pool_A = to_variable(fake_pool_B)
 
                 # optimize the d_A network
-                rec_B, fake_pool_rec_B = d_a(data_B,fake_pool_B)
+                rec_B, fake_pool_rec_B = D_A(data_B,fake_pool_B)
                 if batch_id == 0:
                     print("rec_B",rec_B.numpy())
                     print("fake_pool_rec_B",fake_pool_rec_B.numpy())
@@ -195,20 +224,44 @@ def train(args):
                 d_loss_A = fluid.layers.reduce_mean(d_loss_A)
 
                 d_loss_A.backward()
-                optimizer2.minimize(d_loss_A)
-                d_a.clear_gradients()
+                vars_da = []
+                for param in D_A.parameters():
+                    if param.name[:41]=="d_a/Cycle_Gan_0/build_gen_discriminator_0":
+                        #print (param.name)
+                        vars_da.append(param)
+                optimizer2.minimize(d_loss_A,parameter_list=vars_da)
+                #fluid.dygraph.save_persistables(D_A.state_dict(),
+                #                                    "./G")
+                D_A.clear_gradients()
+
+                #for param in G.parameters():
+                #    dy_param_init_value[param.name] = param.numpy()
+                #restore = fluid.dygraph.load_persistables("./G")
+                #D_A.load_dict(restore)
+                #D_A.clear_gradients()
 
                 # optimize the d_B network
 
-                rec_A, fake_pool_rec_A = d_b(data_A,fake_pool_A)
+                rec_A, fake_pool_rec_A = D_B(data_A,fake_pool_A)
                 d_loss_B = (fluid.layers.square(fake_pool_rec_A) +
                     fluid.layers.square(rec_A - 1)) / 2.0
                 d_loss_B = fluid.layers.reduce_mean(d_loss_B)
 
                 d_loss_B.backward()
-                optimizer3.minimize(d_loss_B)
-                d_b.clear_gradients()
+                vars_db = []
+                for param in D_B.parameters():
+                    if param.name[:41]=="d_b/Cycle_Gan_0/build_gen_discriminator_1":
+                        #print (param.name)
+                        vars_db.append(param)
+                optimizer2.minimize(d_loss_B,parameter_list=vars_db)
+                #fluid.dygraph.save_persistables(D_B.state_dict(),
+                #                                    "./G")
+                D_B.clear_gradients()
 
+                #for param in D_B.parameters():
+                #    dy_param_init_value[param.name] = param.numpy()                
+                #restore = fluid.dygraph.load_persistables("./G")
+                #D_B.load_dict(restore)
                 batch_time = time.time() - s_time
                 t_time += batch_time
                 print(

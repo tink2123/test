@@ -109,7 +109,8 @@ class build_generator_resnet_9blocks(fluid.dygraph.Layer):
 class build_gen_discriminator(fluid.dygraph.Layer):
     def __init__(self,name_scope):
         super(build_gen_discriminator,self).__init__(name_scope)
-
+        
+        print( "!!!!!!!!!!!!!!!!!!!init")
         self.conv0 = conv2d(self.full_name(),
             num_channels=3,
             num_filters=64,

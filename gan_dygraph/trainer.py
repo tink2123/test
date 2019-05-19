@@ -10,12 +10,19 @@ lambda_B = 10.0
 lambda_identity = 0.5
 
 
-class G_A(fluid.dygraph.Layer):
+class Cycle_Gan(fluid.dygraph.Layer):
     """docstring for GATrainer"""
-    def __init__(self, name_scope):
-        super (G_A, self).__init__(name_scope)
-        self.build_gen_discriminator = build_gen_discriminator(self.full_name())
-        self.build_generator_resnet_9blocks = build_generator_resnet_9blocks(self.full_name())
+    def __init__(self, name_scope,istrain=True,is_G=True,is_DA=True,is_DB=True):
+        super (Cycle_Gan, self).__init__(name_scope)
+
+        self.build_generator_resnet_9blocks_a = build_generator_resnet_9blocks(self.full_name())
+        self.build_generator_resnet_9blocks_b = build_generator_resnet_9blocks(self.full_name())
+        if istrain:
+            self.build_gen_discriminator_a = build_gen_discriminator(self.full_name())
+            self.build_gen_discriminator_b = build_gen_discriminator(self.full_name())
+        self.is_G = is_G
+        self.is_DA = is_DA
+        self.is_DB = is_DB
 
     def build_once(self,input_A,input_B):
         print('---------------', input_A.shape)
@@ -24,46 +31,43 @@ class G_A(fluid.dygraph.Layer):
 
     def forward(self,input_A,input_B):
 
-        fake_B = self.build_generator_resnet_9blocks(input_A)
-        fake_A = self.build_generator_resnet_9blocks(input_B)
-        cyc_A = self.build_generator_resnet_9blocks(fake_B)
-        cyc_B = self.build_generator_resnet_9blocks(fake_A)
+        if self.is_G:
+            fake_B = self.build_generator_resnet_9blocks_a(input_A)
+            fake_A = self.build_generator_resnet_9blocks_b(input_B)
+            cyc_A = self.build_generator_resnet_9blocks_b(fake_B)
+            cyc_B = self.build_generator_resnet_9blocks_a(fake_A)
 
-        diff_A = fluid.layers.abs(
-            fluid.layers.elementwise_sub(
-                x=input_A,y=cyc_A))
-        diff_B = fluid.layers.abs(
-            fluid.layers.elementwise_sub(
-                x=input_B, y=cyc_B))
-        fake_rec_A = self.build_gen_discriminator(fake_B)
-        
-        fake_rec_B = self.build_gen_discriminator(fake_A)
-        idt_A = self.build_generator_resnet_9blocks(input_B)
-        idt_B = self.build_generator_resnet_9blocks(input_A)
+            diff_A = fluid.layers.abs(
+                fluid.layers.elementwise_sub(
+                    x=input_A,y=cyc_A))
+            diff_B = fluid.layers.abs(
+                fluid.layers.elementwise_sub(
+                    x=input_B, y=cyc_B))
+            fake_rec_A = self.build_gen_discriminator_a(fake_B)
+            
+            fake_rec_B = self.build_gen_discriminator_b(fake_A)
+            
+            idt_A = self.build_generator_resnet_9blocks_a(input_B)
 
-        return fake_A,fake_B,cyc_A,cyc_B,diff_A,diff_B,fake_rec_A,fake_rec_B,idt_A,idt_B
+            idt_B = self.build_generator_resnet_9blocks_b(input_A)
 
-    
+            return fake_A,fake_B,cyc_A,cyc_B,diff_A,diff_B,fake_rec_A,fake_rec_B,idt_A,idt_B
 
-class D_A(fluid.dygraph.Layer):
-    """docstring for g_B"""
-    def __init__(self, name_scope):
-        super (D_A, self).__init__(name_scope)
-        self.build_gen_discriminator = build_gen_discriminator(self.full_name())
-    def forward(self,input_A,fake_pool_A):
-        rec_A = self.build_gen_discriminator(input_A)
-        fake_pool_rec_A = self.build_gen_discriminator(fake_pool_A)
+        if self.is_DA:
+
+            ### D
+            rec_B = self.build_gen_discriminator_a(input_A)
+
+            fake_pool_rec_B = self.build_gen_discriminator_a(input_B)
+
+            return rec_B, fake_pool_rec_B
+
+        if self.is_DB:
+
+            rec_A = self.build_gen_discriminator_b(input_A)
+
+            fake_pool_rec_A = self.build_gen_discriminator_b(input_B)
+
+
         return rec_A, fake_pool_rec_A
-
-
-class D_B(fluid.dygraph.Layer):
-    """docstring for g_B"""
-    def __init__(self, name_scope):
-        super (D_B, self).__init__(name_scope)
-        self.build_gen_discriminator = build_gen_discriminator(self.full_name())
-    def forward(self,input_A,fake_pool_B):
-        rec_B = self.build_gen_discriminator(input_A)
-        fake_pool_rec_B = self.build_gen_discriminator(fake_pool_B)
-        return rec_B, fake_pool_rec_B
-
 
