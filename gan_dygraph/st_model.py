@@ -38,6 +38,8 @@ def st_build_generator_resnet_9blocks(inputgen, name="generator"):
     o_c1 = conv2d(pad_input, 32, 7, 1, 0.02, name=name + "_c0")
     o_c2 = conv2d(o_c1, 64, 3, 2, 0.02, 1, name + "_c1")
     o_c3 = conv2d(o_c2, 128, 3, 2, 0.02, 1, name + "_c2")
+    #print("test_st:9blocks_tmp")
+    ##fluid.layers.Print(o_c3,print_tensor_name=True,summarize=10)
     o_r1 = st_build_resnet_block(o_c3, 128, name + "_r0")
     o_r2 = st_build_resnet_block(o_r1, 128, name + "_r1")
     o_r3 = st_build_resnet_block(o_r2, 128, name + "_r2")
@@ -51,8 +53,8 @@ def st_build_generator_resnet_9blocks(inputgen, name="generator"):
     o_c5 = deconv2d(o_c4, 32, 3, 2, 0.02, [1,1], [0,1,0,1], name + "_d1")
     o_p2 = fluid.layers.pad2d(o_c5, [3, 3, 3, 3], mode="reflect")
     o_c6 = conv2d(o_p2, 3, 7, 1, 0.02, name = name + "_c3", norm=False, relu=False, use_bias=True)
-
     out_gen = fluid.layers.tanh(o_c6, name + "_t1")
+    #fluid.layers.Print(out_gen,print_tensor_name=True,summarize=10)
     return out_gen
 
 

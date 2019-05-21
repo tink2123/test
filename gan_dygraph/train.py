@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
 # yapf: disable
 add_arg('batch_size',        int,   1,          "Minibatch size.")
-add_arg('epoch',             int,   2,        "The number of epoched to be trained.")
+add_arg('epoch',             int,   20,        "The number of epoched to be trained.")
 add_arg('output',            str,   "./output_0", "The directory the model and the test result to be saved to.")
 add_arg('init_model',        str,   None,       "The init model file of directory.")
 add_arg('save_checkpoints',  bool,  True,       "Whether to save checkpoints.")
@@ -38,7 +38,19 @@ lambda_B = 10.0
 lambda_identity = 0.5
 tep_per_epoch = 2974
 
-
+def optimizer_setting():
+    lr=0.0002
+    optimizer = fluid.optimizer.Adam(
+        learning_rate=fluid.layers.piecewise_decay(
+            boundaries=[
+                12 * step_per_epoch, 32 * step_per_epoch,
+                52 * step_per_epoch, 72 * step_per_epoch
+            ],
+            values=[
+                lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
+            ]),
+        beta1=0.5)
+    return optimizer
 def train(args):
     dy_param_init_value = {}
     with fluid.dygraph.guard():
@@ -88,28 +100,13 @@ def train(args):
             print("saved checkpoint to {}".format(out_path))
             sys.stdout.flush()
 
-        G = Cycle_Gan("g",istrain=True,is_G=True,is_DA=False,is_DB=False)
-        D_A = Cycle_Gan("d_a",istrain=True,is_G=False,is_DA=True,is_DB=False)
-        D_B = Cycle_Gan("d_b",istrain=True,is_G=False,is_DA=False,is_DB=True)
-
-        def load_dict(self, stat_dict, include_sublayers=True):
-            self._loaddict_holder = stat_dict
-            for name, item in self.__dict__.get('_parameters', None).items():
-                if item.name in stat_dict:
-                    var = item._ivar.value()
-                    tensor = var.get_tensor()
-                    tensor.set(stat_dict[item.name].numpy(),
-                               framework._current_expected_place())
-
-            if include_sublayers:
-                for layer_name, layer_item in self._sub_layers.items():
-                    if layer_item is not None:
-                        layer_item.load_dict(stat_dict)
+        cycle_gan = Cycle_Gan("cycle_gan",istrain=True)
 
         losses = [[], []]
         t_time = 0
-
-        vars1 = []
+        optimizer1 = optimizer_setting()
+        optimizer2 = optimizer_setting()
+        optimizer3 = optimizer_setting()
 ##        for param in G.parameters():
 ##            if param.name[:44]=="g/Cycle_Gan_0/build_generator_resnet_9blocks":
 ##                print (param.name)
@@ -132,16 +129,14 @@ def train(args):
                 data_B = to_variable(data_B)
 
                 # optimize the g_A network
-                fake_A,fake_B,cyc_A,cyc_B,diff_A,diff_B,fake_rec_A,fake_rec_B,idt_A,idt_B = G(data_A,data_B)
+                fake_A,fake_B,cyc_A,cyc_B,diff_A,diff_B,fake_rec_A,fake_rec_B,idt_A,idt_B = cycle_gan(data_A,data_B,True,False,False)
 
-                fake_A.persistable=True
-                fake_B.persistable=True
                 #print(fake_B.numpy()) 
                 # cycle loss
                 cyc_A_loss = fluid.layers.reduce_mean(diff_A) * lambda_A
                 cyc_B_loss = fluid.layers.reduce_mean(diff_B) * lambda_B
                 cyc_loss = cyc_A_loss + cyc_B_loss
-                print(cyc_loss)
+                #print(cyc_loss)
                 #for k,v in six.iteritems(fluid.framework._dygraph_tracer()._ops):
                 #    print(v.type)  
           
@@ -165,7 +160,6 @@ def train(args):
                     x = data_A, y = idt_B))) * lambda_A * lambda_identity
 
                 idt_loss = fluid.layers.elementwise_add(idt_loss_A, idt_loss_B)
-                print("g_loss:",g_loss)
                 g_loss = cyc_loss + g_loss + idt_loss
 
                 g_loss_out = g_loss.numpy()
@@ -173,25 +167,14 @@ def train(args):
                 g_loss.backward()
                 #optimizer1.minimize(g_loss)
                 vars_G = []
-                for param in G.parameters():
-                    if param.name[:44]=="g/Cycle_Gan_0/build_generator_resnet_9blocks": 
-                        #print (param.name)
+                for param in cycle_gan.parameters():
+                    if param.name[:52]=="cycle_gan/Cycle_Gan_0/build_generator_resnet_9blocks":    
+			#print (param.name)
                         vars_G.append(param)
-                lr = 0.0002
-                optimizer = fluid.optimizer.Adam(
-                    learning_rate=fluid.layers.piecewise_decay(
-                        boundaries=[
-                            12 * step_per_epoch, 32 * step_per_epoch,
-                            52 * step_per_epoch, 72 * step_per_epoch
-                        ],
-                        values=[
-                            lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
-                        ]),
-                    beta1=0.5)
 
-                optimizer.minimize(g_loss,parameter_list=vars_G)                
+                optimizer1.minimize(g_loss,parameter_list=vars_G)                
                 #fluid.dygraph.save_persistables(G.state_dict(),"./G")
-                G.clear_gradients()
+                cycle_gan.clear_gradients()
 
                 #for param in G.parameters():
                 #    dy_param_init_value[param.name] = param.numpy()
@@ -213,24 +196,24 @@ def train(args):
                 fake_pool_A = to_variable(fake_pool_B)
 
                 # optimize the d_A network
-                rec_B, fake_pool_rec_B = D_A(data_B,fake_pool_B)
-                if batch_id == 0:
-                    print("rec_B",rec_B.numpy())
-                    print("fake_pool_rec_B",fake_pool_rec_B.numpy())
+                rec_B, fake_pool_rec_B = cycle_gan(data_B,fake_pool_B,False,True,False)
+                # if batch_id == 0:
+                #     print("rec_B",rec_B.numpy())
+                #     print("fake_pool_rec_B",fake_pool_rec_B.numpy())
                 d_loss_A = (fluid.layers.square(fake_pool_rec_B) +
                     fluid.layers.square(rec_B - 1)) / 2.0
                 d_loss_A = fluid.layers.reduce_mean(d_loss_A)
 
                 d_loss_A.backward()
                 vars_da = []
-                for param in D_A.parameters():
-                    if param.name[:41]=="d_a/Cycle_Gan_0/build_gen_discriminator_0":
+                for param in cycle_gan.parameters():
+                    if param.name[:47]=="cycle_gan/Cycle_Gan_0/build_gen_discriminator_0":
                         #print (param.name)
                         vars_da.append(param)
-                optimizer.minimize(d_loss_A,parameter_list=vars_da)
+                optimizer2.minimize(d_loss_A,parameter_list=vars_da)
                 #fluid.dygraph.save_persistables(D_A.state_dict(),
                 #                                    "./G")
-                D_A.clear_gradients()
+                cycle_gan.clear_gradients()
 
                 #for param in G.parameters():
                 #    dy_param_init_value[param.name] = param.numpy()
@@ -240,21 +223,21 @@ def train(args):
 
                 # optimize the d_B network
 
-                rec_A, fake_pool_rec_A = D_B(data_A,fake_pool_A)
+                rec_A, fake_pool_rec_A = cycle_gan(data_A,fake_pool_A,False,True,False)
                 d_loss_B = (fluid.layers.square(fake_pool_rec_A) +
                     fluid.layers.square(rec_A - 1)) / 2.0
                 d_loss_B = fluid.layers.reduce_mean(d_loss_B)
 
                 d_loss_B.backward()
                 vars_db = []
-                for param in D_B.parameters():
-                    if param.name[:41]=="d_b/Cycle_Gan_0/build_gen_discriminator_1":
+                for param in cycle_gan.parameters():
+                    if param.name[:47]=="cycle_gan/Cycle_Gan_0/build_gen_discriminator_1":
                         #print (param.name)
                         vars_db.append(param)
-                optimizer.minimize(d_loss_B,parameter_list=vars_db)
+                optimizer3.minimize(d_loss_B,parameter_list=vars_db)
                 #fluid.dygraph.save_persistables(D_B.state_dict(),
                 #                                    "./G")
-                D_B.clear_gradients()
+                cycle_gan.clear_gradients()
 
                 #for param in D_B.parameters():
                 #    dy_param_init_value[param.name] = param.numpy()                
@@ -263,7 +246,7 @@ def train(args):
                 batch_time = time.time() - s_time
                 t_time += batch_time
                 print(
-                    "epoch{}; batch{}; d_A_loss: {}; g_A_loss: {}; g_A_cyc_loss: {}; g_A_idt_loss: {}; d_B_loss: {}; g_B_loss: {}; g_B_cyc_loss:  {}; g_B_idt_loss: {};Batch_time_cost: {:.2f}".format(epoch, batch_id,d_loss_A.numpy()[0], g_A_loss.numpy()[0],cyc_A_loss.numpy()[0], idt_loss_A.numpy()[0], d_loss_B.numpy()[0], g_B_loss.numpy()[0],cyc_B_loss.numpy()[0],idt_loss_B.numpy()[0], batch_time))
+                    "epoch{}; batch{}; g_loss:{}; d_A_loss: {}; d_B_loss:{} ; \n g_A_loss: {}; g_A_cyc_loss: {}; g_A_idt_loss: {}; g_B_loss: {}; g_B_cyc_loss:  {}; g_B_idt_loss: {};Batch_time_cost: {:.2f}".format(epoch, batch_id,g_loss_out[0],d_loss_A.numpy()[0], d_loss_B.numpy()[0],g_A_loss.numpy()[0],cyc_A_loss.numpy()[0], idt_loss_A.numpy()[0],  g_B_loss.numpy()[0],cyc_B_loss.numpy()[0],idt_loss_B.numpy()[0], batch_time))
                 with open('logging_{}.txt'.format(args.changes), 'a') as log_file:
                     now = time.strftime("%c")
                     log_file.write(
@@ -283,6 +266,7 @@ def train(args):
                 test(epoch)
             if args.save_checkpoints and not args.run_ce:
                 checkpoints(epoch)
+            fluid.dygraph.save_persistables(cycle_gan.state_dict(),"./G/{}".format(epoch))
 
 if __name__ == "__main__":
     args = parser.parse_args()

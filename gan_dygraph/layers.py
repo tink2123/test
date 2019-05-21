@@ -27,9 +27,9 @@ class conv2d(fluid.dygraph.Layer):
         super(conv2d, self).__init__(name_scope)
 
         if use_bias == False:
-            bias_attr = False
+            con_bias_attr = None
         else:
-            bias_attr = fluid.ParamAttr(name="conv_bias",initializer=fluid.initializer.Constant(0.0))
+            con_bias_attr = fluid.ParamAttr(name="conv_bias",initializer=fluid.initializer.Constant(0.0))
 
         self.conv = Conv2D(
             self.full_name(),
@@ -41,19 +41,19 @@ class conv2d(fluid.dygraph.Layer):
             use_cudnn=use_cudnn,
             param_attr=fluid.ParamAttr(
                 name="conv2d_weights",
-                initializer=fluid.initializer.NormalInitializer(0.0,0.02)),
-            bias_attr=None)
-
-        self.bn = BatchNorm(self.full_name(),
-            num_channels=num_filters,
-            param_attr=fluid.ParamAttr(
-                name="scale",
-                initializer=fluid.initializer.NormalInitializer(1.0,0.02)),
-            bias_attr=fluid.ParamAttr(
-                name="bias",
-                initializer=fluid.initializer.Constant(0.0)),
-            )
-
+                initializer=fluid.initializer.NormalInitializer(loc=0.0,scale=stddev)),
+            bias_attr=con_bias_attr)
+        if norm:
+            self.bn = BatchNorm(self.full_name(),
+                num_channels=num_filters,
+                param_attr=fluid.ParamAttr(
+                    name="scale",
+                    initializer=fluid.initializer.NormalInitializer(1.0,0.02)),
+                bias_attr=fluid.ParamAttr(
+                    name="bias",
+                    initializer=fluid.initializer.Constant(0.0)),
+                )
+    
         self.relufactor = relufactor
         self.use_bias = use_bias
         self.norm = norm
@@ -62,13 +62,12 @@ class conv2d(fluid.dygraph.Layer):
     
     def forward(self,inputs):
         conv = self.conv(inputs)
-        #print("norm",self.norm)
-        #print("bias",self.biat_attr)
         if self.norm:
             conv = self.bn(conv)
+        #print("test relu:")
         if self.relu:
-            conv = fluid.layers.leaky_relu(conv,alpha=0.2)
-       
+            conv = fluid.layers.leaky_relu(conv,alpha=self.relufactor)
+        #print(conv.numpy()[0][0][0][:10])
         return conv
 
 
@@ -100,7 +99,7 @@ class DeConv2D(fluid.dygraph.Layer):
                                         padding=padding,
                                         param_attr=fluid.ParamAttr(
                                             name="this_is_deconv_weights",
-                                            initializer=fluid.initializer.TruncatedNormal(scale=stddev)),
+                                            initializer=fluid.initializer.NormalInitializer(loc=0.0, scale=0.02)),
                                         bias_attr=bias_attr)
 
 
@@ -110,7 +109,7 @@ class DeConv2D(fluid.dygraph.Layer):
             num_channels=num_filters,
             param_attr=fluid.ParamAttr(
                 name="de_wights",
-                initializer=fluid.initializer.TruncatedNormal(1.0, 0.02)),
+                initializer=fluid.initializer.NormalInitializer(1.0, 0.02)),
             bias_attr=fluid.ParamAttr(name="de_bn_bias",initializer=fluid.initializer.Constant(0.0)))        
         self.outpadding = outpadding
         self.relufactor = relufactor
@@ -124,7 +123,7 @@ class DeConv2D(fluid.dygraph.Layer):
         conv = self._deconv(inputs)
         #else:
         #    conv = self._deconv(inputs)
-        conv = fluid.layers.pad2d(conv, paddings=self.outpadding, mode='Constant', pad_value=0.0)
+        conv = fluid.layers.pad2d(conv, paddings=self.outpadding, mode='constant', pad_value=0.0)
 
         if self.norm:
             conv = self.bn(conv)

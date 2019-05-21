@@ -45,6 +45,7 @@ class build_generator_resnet_9blocks(fluid.dygraph.Layer):
             num_channels=3,
             filter_size=7,
             stride=1,
+            padding=0,
             stddev=0.02)
         self.conv1 = conv2d(self.full_name(),
             num_filters=64,
@@ -64,9 +65,9 @@ class build_generator_resnet_9blocks(fluid.dygraph.Layer):
         dim = 32*4
         for i in range(9):
             Build_Resnet_Block = self.add_sublayer(
-                "generator" + "_r%d" % (i+1),
+                "generator_%d" % (i+1),
                 build_resnet_block(self.full_name(),
-                                    dim=dim))
+                                    128))
             self.build_resnet_block_list.append(Build_Resnet_Block)
         self.deconv0 = DeConv2D(self.full_name(),
             num_filters=32*2,
@@ -89,28 +90,30 @@ class build_generator_resnet_9blocks(fluid.dygraph.Layer):
             filter_size=7,
             stride=1,
             stddev=0.02,
+            padding=0,
             relu=False,
             norm=False,
             use_bias=True)
     def forward(self,inputs):
         pad_input = fluid.layers.pad2d(inputs, [3, 3, 3, 3], mode="reflect")
         y = self.conv0(pad_input)
+        #print("test:9blocks_tmp")
         y = self.conv1(y)
         y = self.conv2(y)
-        for build_resnet_block in self.build_resnet_block_list:
-            y = build_resnet_block(y)
+        for build_resnet_block_i in self.build_resnet_block_list:
+            y = build_resnet_block_i(y)
         y = self.deconv0(y)
         y = self.deconv1(y)
         y = fluid.layers.pad2d(y,[3,3,3,3],mode="reflect")
         y = self.conv3(y)
         y = fluid.layers.tanh(y)
+        #print(y.numpy()[0][0][0][:10])
         return y
 
 class build_gen_discriminator(fluid.dygraph.Layer):
     def __init__(self,name_scope):
         super(build_gen_discriminator,self).__init__(name_scope)
         
-        print( "!!!!!!!!!!!!!!!!!!!init")
         self.conv0 = conv2d(self.full_name(),
             num_channels=3,
             num_filters=64,

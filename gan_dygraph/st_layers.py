@@ -82,7 +82,7 @@ def conv2d(input,
             initializer=fluid.initializer.Constant(0.0))
 ###            initializer = fluid.initializer.NormalInitializer(loc=0.0, scale=stddev))
     else:
-       bias_attr = False
+       bias_attr = None
 
     conv = fluid.layers.conv2d(
         input,
@@ -94,12 +94,15 @@ def conv2d(input,
         use_cudnn=use_cudnn,
         param_attr=param_attr,
         bias_attr=bias_attr)
+    #print("test st_relu:")
+    #fluid.layers.Print(conv,print_tensor_name=True,summarize=10)
     if norm:
         conv = norm_layer(input=conv, norm_type='batch_norm', name=name + "_norm")
         #print conv
-        #fluid.layers.Print(input=conv, print_tensor_name=True,summarize=2)
+        #fluid.layers.Print(input=conv, print_tensor_name=True,summarize=10)
     if relu:
         conv = fluid.layers.leaky_relu(conv, alpha=relufactor)
+        #fluid.layers.Print(input=conv, print_tensor_name=True,summarize=10)
     return conv
 
 
