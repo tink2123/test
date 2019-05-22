@@ -27,7 +27,7 @@ def infer(args):
     data_shape = [-1, 3, 256, 256]
     inputA = fluid.layers.data(name='inputA', shape=data_shape, dtype='float32')
     inputB = fluid.layers.data(name='inputB', shape=data_shape, dtype='float32')
-    model_name = 'gen'
+    save_dir = './G/9'
 ###    if args.input_style == "A":
 ###        model_name = 'g_a'
 ###        fake = build_generator_resnet_9blocks(input, name="g_A")
@@ -36,6 +36,9 @@ def infer(args):
 ###        fake = build_generator_resnet_9blocks(input, name="g_B")
 ###    else:
 ###        raise "Input with style [%s] is not supported." % args.input_style
+    restore = fluid.dygraph.load_persistables(save_dir)
+     
+
     fakeB = build_generator_resnet_9blocks(inputA, name='g_A')
     fakeA = build_generator_resnet_9blocks(inputB, name='g_B')
     # prepare environment
@@ -47,9 +50,6 @@ def infer(args):
     for var in fluid.default_main_program().global_block().all_parameters():
         print(var.name)
     print(args.init_model + '/' + model_name)
-
-###    fluid.io.load_vars(exe, args.init_model + "/" + model_name)
-    fluid.io.load_persistables(exe, args.init_model + "/" + model_name)
 
     if not os.path.exists(args.output):
         os.makedirs(args.output)

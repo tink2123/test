@@ -27,7 +27,7 @@ class conv2d(fluid.dygraph.Layer):
         super(conv2d, self).__init__(name_scope)
 
         if use_bias == False:
-            con_bias_attr = None
+            con_bias_attr = False
         else:
             con_bias_attr = fluid.ParamAttr(name="conv_bias",initializer=fluid.initializer.Constant(0.0))
 
@@ -130,5 +130,3 @@ class DeConv2D(fluid.dygraph.Layer):
         if self.relu:
             conv = fluid.layers.leaky_relu(conv,alpha=self.relufactor)
         return conv
-
-

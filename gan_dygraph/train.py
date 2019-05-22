@@ -43,18 +43,17 @@ def optimizer_setting():
     optimizer = fluid.optimizer.Adam(
         learning_rate=fluid.layers.piecewise_decay(
             boundaries=[
-                12 * step_per_epoch, 32 * step_per_epoch,
-                52 * step_per_epoch, 72 * step_per_epoch
+                100 * step_per_epoch, 120 * step_per_epoch,
+                140 * step_per_epoch, 160 * step_per_epoch,
+                180 * step_per_epoch
             ],
             values=[
-                lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
+                lr , lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
             ]),
-        beta1=0.5)
+        beta1=0.5)    
     return optimizer
 def train(args):
-    dy_param_init_value = {}
     with fluid.dygraph.guard():
-
         max_images_num = data_reader.max_images_num()
         shuffle = True
         if args.run_ce:
@@ -84,6 +83,43 @@ def train(args):
             data_reader.a_reader(shuffle=shuffle), args.batch_size)()
         B_reader = paddle.batch(
             data_reader.b_reader(shuffle=shuffle), args.batch_size)()
+        A_test_reader = data_reader.a_test_reader()
+        B_test_reader = data_reader.b_test_reader()
+
+	def test(epoch):
+            out_path = args.output + "/test"
+            if not os.path.exists(out_path):
+		os.makedirs(out_path)
+	    for data_A , data_B in zip(A_test_reader(), B_test_reader()): 
+                A_name = data_A[1]
+                B_name = data_B[1]
+                print(A_name)
+                print(B_name)
+                tensor_A = np.array([data_A[0].reshape(3,256,256)]).astype("float32")
+                tensor_B = np.array([data_B[0].reshape(3,256,256)]).astype("float32")
+                data_A_tmp = to_variable(tensor_A)
+                data_B_tmp = to_variable(tensor_B)
+                print("!!!!!!!!test()!!!!!!!!",data_B_tmp.numpy())
+                fake_A_temp,fake_B_temp,cyc_A_temp,cyc_B_temp,g_A_loss,g_B_loss,idt_loss_A,idt_loss_B,cyc_A_loss,cyc_B_loss,g_loss = cycle_gan(data_A_tmp,data_B_tmp,True,False,False)
+
+                fake_A_temp = np.squeeze(fake_A_temp.numpy()[0]).transpose([1, 2, 0])
+                fake_B_temp = np.squeeze(fake_B_temp.numpy()[0]).transpose([1, 2, 0])
+                cyc_A_temp = np.squeeze(cyc_A_temp.numpy()[0]).transpose([1, 2, 0])
+                cyc_B_temp = np.squeeze(cyc_B_temp.numpy()[0]).transpose([1, 2, 0])
+                input_A_temp = np.squeeze(data_A[0]).transpose([1, 2, 0])
+                input_B_temp = np.squeeze(data_B[0]).transpose([1, 2, 0])
+                imsave(out_path + "/fakeB_" + str(epoch) + "_" + A_name, (
+                    (fake_B_temp + 1) * 127.5).astype(np.uint8))
+                imsave(out_path + "/fakeA_" + str(epoch) + "_" + B_name, (
+                    (fake_A_temp + 1) * 127.5).astype(np.uint8))
+                imsave(out_path + "/cycA_" + str(epoch) + "_" + A_name, (
+                    (cyc_A_temp + 1) * 127.5).astype(np.uint8))
+                imsave(out_path + "/cycB_" + str(epoch) + "_" + B_name, (
+                    (cyc_B_temp + 1) * 127.5).astype(np.uint8))
+                imsave(out_path + "/inputA_" + str(epoch) + "_" + A_name, (
+                    (input_A_temp + 1) * 127.5).astype(np.uint8))
+                imsave(out_path + "/inputB_" + str(epoch) + "_" + B_name, (
+                    (input_B_temp + 1) * 127.5).astype(np.uint8))
 
         def checkpoints(epoch):
             out_path = args.output + "/checkpoints/" + str(epoch)
@@ -129,38 +165,7 @@ def train(args):
                 data_B = to_variable(data_B)
 
                 # optimize the g_A network
-                fake_A,fake_B,cyc_A,cyc_B,diff_A,diff_B,fake_rec_A,fake_rec_B,idt_A,idt_B = cycle_gan(data_A,data_B,True,False,False)
-
-                #print(fake_B.numpy()) 
-                # cycle loss
-                cyc_A_loss = fluid.layers.reduce_mean(diff_A) * lambda_A
-                cyc_B_loss = fluid.layers.reduce_mean(diff_B) * lambda_B
-                cyc_loss = cyc_A_loss + cyc_B_loss
-                #print(cyc_loss)
-                #for k,v in six.iteritems(fluid.framework._dygraph_tracer()._ops):
-                #    print(v.type)  
-          
-                #print(fluid.framework._dygraph_tracer()._ops)
-                #gan loss D_A(G_A(A))
-                g_A_loss = fluid.layers.reduce_mean(fluid.layers.square(fake_rec_A-1))
-                #gan loss D_B(G_B(B))
-                g_B_loss = fluid.layers.reduce_mean(fluid.layers.square(fake_rec_B-1))
-
-                g_loss = g_A_loss + g_B_loss
-
-                # identity loss G_A
-                idt_loss_A = fluid.layers.reduce_mean(fluid.layers.abs(
-                    fluid.layers.elementwise_sub(
-                    x = data_B, y = idt_A))) * lambda_B * lambda_identity
-
-                # identity loss G_B
-
-                idt_loss_B = fluid.layers.reduce_mean(fluid.layers.abs(
-                    fluid.layers.elementwise_sub(
-                    x = data_A, y = idt_B))) * lambda_A * lambda_identity
-
-                idt_loss = fluid.layers.elementwise_add(idt_loss_A, idt_loss_B)
-                g_loss = cyc_loss + g_loss + idt_loss
+		fake_A,fake_B,cyc_A,cyc_B,g_A_loss,g_B_loss,idt_loss_A,idt_loss_B,cyc_A_loss,cyc_B_loss,g_loss = cycle_gan(data_A,data_B,True,False,False)
 
                 g_loss_out = g_loss.numpy()
 
@@ -197,9 +202,6 @@ def train(args):
 
                 # optimize the d_A network
                 rec_B, fake_pool_rec_B = cycle_gan(data_B,fake_pool_B,False,True,False)
-                # if batch_id == 0:
-                #     print("rec_B",rec_B.numpy())
-                #     print("fake_pool_rec_B",fake_pool_rec_B.numpy())
                 d_loss_A = (fluid.layers.square(fake_pool_rec_B) +
                     fluid.layers.square(rec_B - 1)) / 2.0
                 d_loss_A = fluid.layers.reduce_mean(d_loss_A)
@@ -262,23 +264,13 @@ def train(args):
                 sys.stdout.flush()
                 batch_id += 1
 
-            if args.run_test and not args.run_ce:
-                test(epoch)
+            #if args.run_test and not args.run_ce:
+            #    test(epoch)
             if args.save_checkpoints and not args.run_ce:
-                checkpoints(epoch)
-            fluid.dygraph.save_persistables(cycle_gan.state_dict(),"./G/{}".format(epoch))
+                fluid.dygraph.save_persistables(cycle_gan.state_dict(),"./G/{}".format(epoch))
+            test(epoch)
 
 if __name__ == "__main__":
     args = parser.parse_args()
     print_arguments(args)
-    if args.profile:
-        if args.use_gpu:
-            with profiler.profiler('All', 'total'):
-                train(args)
-###            with profiler.cuda_profiler("cuda_profiler.txt", 'csv') as nvprof:
-###                train(args)
-        else:
-            with profiler.profiler("CPU", sorted_key='total') as cpuprof:
-                train(args)
-    else:
-        train(args)
+    train(args)

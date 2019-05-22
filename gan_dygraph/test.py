@@ -32,7 +32,8 @@ class GTrainer():
             self.fake_A = st_build_generator_resnet_9blocks(input_B, name="g_B")
             self.fake_A.persistable = True
             # build_generatro_res_9block is wrong
-            #fluid.layers.Print(input=self.fake_A,print_tensor_name=True)
+            #fluid.layers.Print(input="g_A_c0_w@GRAD",print_tensor_name=True,summarize=10)
+            #fluid.layers.Print(input=self.fake_A,print_tensor_name=True,summarize=10)
             self.cyc_A = st_build_generator_resnet_9blocks(self.fake_B, "g_B")
             self.cyc_B = st_build_generator_resnet_9blocks(self.fake_A, "g_A")
             self.infer_program = self.program.clone()
@@ -55,7 +56,7 @@ class GTrainer():
             # GAN Loss D_A(G_A(A))
             self.fake_rec_A = st_build_gen_discriminator(self.fake_B, "d_A")
             #print("__________________________ fake_rec_A_________________________")
-            #fluid.layers.Print(input=self.fake_rec_A,print_tensor_name=True,summarize=10)
+            #fluid.layers.Print(input=self.fake_A,print_tensor_name=True,summarize=10)
             g_A_tmp = fluid.layers.square(self.fake_rec_A - 1)
             self.G_A = fluid.layers.reduce_mean(
                 fluid.layers.square(self.fake_rec_A - 1))
@@ -89,23 +90,22 @@ class GTrainer():
             #print("__________________________ g_loss _________________________")
             #fluid.layers.Print(input=self.g_loss,print_tensor_name=True)
             vars = []
-            param = []
             for var in self.program.list_vars():
                 if fluid.io.is_parameter(var) and (var.name.startswith("g_A") or var.name.startswith("g_B")):
                     vars.append(var.name)
-            self.paramg = param
+            self.param = vars
             lr = 0.0002
             optimizer = fluid.optimizer.Adam(
                 learning_rate=fluid.layers.piecewise_decay(
                     boundaries=[
-                        12 * step_per_epoch, 32 * step_per_epoch,
-                        52 * step_per_epoch, 72 * step_per_epoch
+                        100 * step_per_epoch, 120 * step_per_epoch,
+                        140 * step_per_epoch, 160 * step_per_epoch,
+                        180 * step_per_epoch
                     ],
                     values=[
-                        lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
+                        lr , lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
                     ]),
-                beta1=0.5,
-                name="gen")
+                beta1=0.5)
 ###            for param in self.program.global_block().all_parameters():
 ###                 print(param.name)
             optimizer.minimize(self.g_loss, parameter_list=vars)
@@ -116,7 +116,7 @@ class DATrainer():
         with fluid.program_guard(self.program):
 
             self.rec_B = st_build_gen_discriminator(input_B, "d_A")
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~ fake_pool_rec_B~~~~~~~~~~~~~~~`")
+            #print("~~~~~~~~~~~~~~~~~~~~~~~~~ fake_pool_rec_B~~~~~~~~~~~~~~~`")
             #fluid.layers.Print(input=self.rec_B,print_tensor_name=True,summarize=10)
             self.fake_pool_rec_B = st_build_gen_discriminator(fake_pool_B, "d_A")
             #fluid.layers.Print(self.fake_pool_rec_B,print_tensor_name=True,summarize=10)
@@ -127,29 +127,25 @@ class DATrainer():
             #fluid.layers.Print(self.d_loss_A_tmp,print_tensor_name=True)
             self.d_loss_A = fluid.layers.reduce_mean(self.d_loss_A)
 
-            optimizer = fluid.optimizer.Adam(learning_rate=0.0002, beta1=0.5)
-            optimizer._name = "d_A"
             vars = []
-            param = []
             for var in self.program.list_vars():
                 if fluid.io.is_parameter(var) and var.name.startswith("d_A"):
                     vars.append(var.name)
                     #fluid.layers.Print(var.name,summarize=10)
 
-            self.parama = param
+            self.param = vars
             lr = 0.0002
             optimizer = fluid.optimizer.Adam(
                 learning_rate=fluid.layers.piecewise_decay(
                     boundaries=[
-                        12 * step_per_epoch, 32 * step_per_epoch,
-                        52 * step_per_epoch, 72 * step_per_epoch
+                        100 * step_per_epoch, 120 * step_per_epoch,
+                        140 * step_per_epoch, 160 * step_per_epoch,
+                        180 * step_per_epoch
                     ],
                     values=[
-                        lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
+                        lr , lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
                     ]),
-                beta1=0.5,
-                name="d_A")
-
+                beta1=0.5)
 ###            for param in self.program.global_block().all_parameters():
 ###                if param.name=="d_A_c3_w": 
 ###                    np.array(fluid.scope.find_var(param.name).get_tensor())
@@ -166,9 +162,7 @@ class DBTrainer():
             self.d_loss_B = (fluid.layers.square(self.fake_pool_rec_A) +
                              fluid.layers.square(self.rec_A - 1)) / 2.0
             self.d_loss_B = fluid.layers.reduce_mean(self.d_loss_B)
-            optimizer = fluid.optimizer.Adam(learning_rate=0.0002, beta1=0.5)
             vars = []
-            param = []
             for var in self.program.list_vars():
                 if fluid.io.is_parameter(var) and var.name.startswith("d_B"):
                     vars.append(var.name)
@@ -177,14 +171,14 @@ class DBTrainer():
             optimizer = fluid.optimizer.Adam(
                 learning_rate=fluid.layers.piecewise_decay(
                     boundaries=[
-                        12 * step_per_epoch, 32 * step_per_epoch,
-                        52 * step_per_epoch, 72 * step_per_epoch
+                        100 * step_per_epoch, 120 * step_per_epoch,
+                        140 * step_per_epoch, 160 * step_per_epoch,
+                        180 * step_per_epoch
                     ],
                     values=[
-                        lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
+                        lr , lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
                     ]),
-                beta1=0.5,
-                name="d_B")
+                beta1=0.5)
 ###            for param in self.program.global_block().all_parameters():
 ###                 print(param.name)
             optimizer.minimize(self.d_loss_B, parameter_list=vars)
@@ -246,7 +240,7 @@ class TestDygraphGAN(unittest.TestCase):
             self.data_pool_B= np.random.random(size=[1,3,256,256]).astype("float32")
             self.data_pool_A= np.random.random(size=[1,3,256,256]).astype("float32")
             exe.run(startup)
-            for i in range(10):    
+            for i in range(10):
                 g_A_loss, g_A_cyc_loss, g_A_idt_loss, g_B_loss, g_B_cyc_loss, g_B_idt_loss, fake_A_tmp, fake_B_tmp = exe.run(
                     gen_trainer_program,
                     fetch_list=[
@@ -256,7 +250,8 @@ class TestDygraphGAN(unittest.TestCase):
                     feed={"input_A": self.data_A,
                           "input_B": self.data_B})
                 sta_g_loss = g_A_loss + g_B_loss + g_A_cyc_loss + g_B_cyc_loss + g_A_idt_loss + g_B_idt_loss
-                #print("sta:g_A_loss:{},g_B_loss:{},g_A_cyc_loss:{},g_B_cyc_loss:{},g_A_idt_loss:{},g_B_idt_loss:{}".format(g_A_loss, g_B_loss,g_A_cyc_loss, g_B_cyc_loss,g_A_idt_loss,g_B_idt_loss))
+                print("sta:g_A_loss:{},g_B_loss:{},g_A_cyc_loss:{},g_B_cyc_loss:{},g_A_idt_loss:{},g_B_idt_loss:{}".format(g_A_loss, g_B_loss,g_A_cyc_loss, g_B_cyc_loss,g_A_idt_loss,g_B_idt_loss))
+                
                 #A_pool = ImagePool()
                 #B_pool = ImagePool()
     
@@ -301,87 +296,89 @@ class TestDygraphGAN(unittest.TestCase):
 
             data_A = to_variable(self.data_A)
             data_B = to_variable(self.data_B)
+            fake_pool_B = to_variable(self.data_pool_B)
+            fake_pool_A = to_variable(self.data_pool_A)
             lr = 0.0002
             optimizer1 = fluid.optimizer.Adam(
                 learning_rate=fluid.layers.piecewise_decay(
                     boundaries=[
-                        12 * step_per_epoch, 32 * step_per_epoch,
-                        52 * step_per_epoch, 72 * step_per_epoch
+                        100 * step_per_epoch, 120 * step_per_epoch,
+                        140 * step_per_epoch, 160 * step_per_epoch,
+                        180 * step_per_epoch
                     ],
                     values=[
-                        lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
+                        lr , lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
                     ]),
                 beta1=0.5)
+
             optimizer2 = fluid.optimizer.Adam(
                 learning_rate=fluid.layers.piecewise_decay(
                     boundaries=[
-                        12 * step_per_epoch, 32 * step_per_epoch,
-                        52 * step_per_epoch, 72 * step_per_epoch
+                        100 * step_per_epoch, 120 * step_per_epoch,
+                        140 * step_per_epoch, 160 * step_per_epoch,
+                        180 * step_per_epoch
                     ],
                     values=[
-                        lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
+                        lr , lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
                     ]),
                 beta1=0.5)
+
             optimizer3 = fluid.optimizer.Adam(
                 learning_rate=fluid.layers.piecewise_decay(
                     boundaries=[
-                        12 * step_per_epoch, 32 * step_per_epoch,
-                        52 * step_per_epoch, 72 * step_per_epoch
+                        100 * step_per_epoch, 120 * step_per_epoch,
+                        140 * step_per_epoch, 160 * step_per_epoch,
+                        180 * step_per_epoch
                     ],
                     values=[
-                        lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
+                        lr , lr * 0.8, lr * 0.6, lr * 0.4, lr * 0.2, lr * 0.1
                     ]),
-                beta1=0.5)
+                beta1=0.5)            
             for i in range(10):
-                fake_A,fake_B,cyc_A,cyc_B,diff_A,diff_B,\
-                fake_rec_A,fake_rec_B,idt_A,idt_B = cycle_gan(data_A,data_B,True,False,False)
-                cyc_A_loss = fluid.layers.reduce_mean(diff_A) * lambda_A
-                cyc_B_loss = fluid.layers.reduce_mean(diff_B) * lambda_B
-                cyc_loss = cyc_A_loss + cyc_B_loss
-    
-                #gan loss D_B(G_B(B))
-                g_A_tmp = fluid.layers.square(fake_rec_A - 1)
-                g_A_loss = fluid.layers.reduce_mean(fluid.layers.square(fake_rec_A-1))
-                g_B_loss = fluid.layers.reduce_mean(fluid.layers.square(fake_rec_B-1))
-    
-                g_loss = g_A_loss + g_B_loss
-                
-                # identity loss G_A
-                idt_loss_A = fluid.layers.reduce_mean(fluid.layers.abs(
-                    fluid.layers.elementwise_sub(
-                    x = data_B, y = idt_A))) * lambda_B * lambda_identity
-    
-                #print("dy_idt_loss_A",idt_loss_A.numpy())
-                idt_loss_B = fluid.layers.reduce_mean(fluid.layers.abs(
-                    fluid.layers.elementwise_sub(
-                    x = data_A, y = idt_B))) * lambda_A * lambda_identity
-    
-                idt_loss = fluid.layers.elementwise_add(idt_loss_A, idt_loss_B)
-    	        #print("cyc_loss:",cyc_loss.numpy())
-                #print("idt_loss:",idt_loss.numpy())
-                g_loss = cyc_loss + g_loss + idt_loss
-    
+###                fake_A,fake_B,cyc_A,cyc_B,diff_A,diff_B,\
+###                fake_rec_A,fake_rec_B,idt_A,idt_B = cycle_gan(data_A,data_B,True,False,False)
+###                cyc_A_loss = fluid.layers.reduce_mean(diff_A) * lambda_A
+###                cyc_B_loss = fluid.layers.reduce_mean(diff_B) * lambda_B
+###                cyc_loss = cyc_A_loss + cyc_B_loss
+###    
+###                #print("dy:fake_A=",fake_A.numpy()[0][:10])
+###                #gan loss D_B(G_B(B))
+###                g_A_tmp = fluid.layers.square(fake_rec_A - 1)
+###                g_A_loss = fluid.layers.reduce_mean(fluid.layers.square(fake_rec_A-1))
+###                g_B_loss = fluid.layers.reduce_mean(fluid.layers.square(fake_rec_B-1))
+###    
+###                g_loss = g_A_loss + g_B_loss
+###                
+###                # identity loss G_A
+###                idt_loss_A = fluid.layers.reduce_mean(fluid.layers.abs(
+###                    fluid.layers.elementwise_sub(
+###                    x = data_B, y = idt_A))) * lambda_B * lambda_identity
+###    
+###                #print("dy_idt_loss_A",idt_loss_A.numpy())
+###                idt_loss_B = fluid.layers.reduce_mean(fluid.layers.abs(
+###                    fluid.layers.elementwise_sub(
+###                    x = data_A, y = idt_B))) * lambda_A * lambda_identity
+###    
+###                idt_loss = fluid.layers.elementwise_add(idt_loss_A, idt_loss_B)
+###    	        #print("cyc_loss:",cyc_loss.numpy())
+###                #print("idt_loss:",idt_loss.numpy())
+###                g_loss = cyc_loss + g_loss + idt_loss
+###    
+###                g_loss_out = g_loss.numpy()
+###                print("dy:g_A_loss:{},g_B_loss:{},g_A_cyc_loss:{},g_B_cyc_loss:{},g_A_idt_loss:{},g_B_idt_loss:{}".format(g_A_loss.numpy(),g_B_loss.numpy(),cyc_A_loss.numpy(),cyc_B_loss.numpy(),idt_loss_A.numpy(),idt_loss_B.numpy()))    
+                fake_A,fake_B,cyc_A,cyc_B,g_A_loss,g_B_loss,idt_loss_A,idt_loss_B,cyc_A_loss,cyc_B_loss,g_loss = cycle_gan(data_A,data_B,True,False,False)
+                print("dy:g_A_loss:{},g_B_loss:{},g_A_cyc_loss:{},g_B_cyc_loss:{},g_A_idt_loss:{},g_B_idt_loss:{}".format(g_A_loss.numpy(),g_B_loss.numpy(),cyc_A_loss.numpy(),cyc_B_loss.numpy(),idt_loss_A.numpy(),idt_loss_B.numpy()))
                 g_loss_out = g_loss.numpy()
-                #print("dy:g_A_loss:{},g_B_loss:{},g_A_cyc_loss:{},g_B_cyc_loss:{},g_A_idt_loss:{},g_B_idt_loss:{}".format(g_A_loss.numpy(),g_B_loss.numpy(),cyc_A_loss.numpy(),cyc_B_loss.numpy(),idt_loss_A.numpy(),idt_loss_B.numpy()))    
                 g_loss.backward()
                 vars_G = []
                 for param in cycle_gan.parameters():
                     if param.name[:52]=="cycle_gan/Cycle_Gan_0/build_generator_resnet_9blocks": 
                         vars_G.append(param)
-                    #if param.name == "cycle_gan/Cycle_Gan_0/build_gen_discriminator_0/conv2d_4/Conv2D_0.conv2d_weights":
-                    #    print ("G",param.name,param.numpy()[:10])
+                    #if param.name == "cycle_gan/Cycle_Gan_0/build_gen_discriminator_0/conv2d_0/Conv2D_0.conv2d_weights":
+                    #    print ("G",param.name,param.gradient()[0][0][0][:10])
                 optimizer1.minimize(g_loss,parameter_list=vars_G)             
                 cycle_gan.clear_gradients()
     
-                for param in cycle_gan.parameters():
-                    if param.name[:52]=="cycle_gan/Cycle_Gan_0/build_generator_resnet_9blocks":
-                        vars_G.append(param)
-                    #if param.name == "cycle_gan/Cycle_Gan_0/build_gen_discriminator_0/conv2d_4/Conv2D_0.conv2d_weights":
-                    #    print ("G_after_op",param.name,param.numpy()[:10])
-      
-                fake_pool_B = to_variable(self.data_pool_B)
-    
-                fake_pool_A = to_variable(self.data_pool_A)
     
                 # optimize the d_A network
                 #print(data_B.numpy())
@@ -400,7 +397,7 @@ class TestDygraphGAN(unittest.TestCase):
                     if param.name[:47]=="cycle_gan/Cycle_Gan_0/build_gen_discriminator_0":
                         vars_da.append(param)
                 optimizer2.minimize(d_loss_A,parameter_list=vars_da)                
-                cycle_gan.clear_gradients()
+                #cycle_gan.clear_gradients()
     
                 # optimize the d_B network
     
