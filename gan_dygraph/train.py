@@ -198,7 +198,7 @@ def train(args):
 
                 fake_pool_A = A_pool.pool_image(fake_A).numpy()
                 fake_pool_A = np.array([fake_pool_A[0].reshape(3,256,256)]).astype("float32")
-                fake_pool_A = to_variable(fake_pool_B)
+                fake_pool_A = to_variable(fake_pool_A)
 
                 # optimize the d_A network
                 rec_B, fake_pool_rec_B = cycle_gan(data_B,fake_pool_B,False,True,False)
@@ -225,7 +225,7 @@ def train(args):
 
                 # optimize the d_B network
 
-                rec_A, fake_pool_rec_A = cycle_gan(data_A,fake_pool_A,False,True,False)
+                rec_A, fake_pool_rec_A = cycle_gan(data_A,fake_pool_A,False,False,True)
                 d_loss_B = (fluid.layers.square(fake_pool_rec_A) +
                     fluid.layers.square(rec_A - 1)) / 2.0
                 d_loss_B = fluid.layers.reduce_mean(d_loss_B)
